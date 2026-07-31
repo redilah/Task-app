@@ -72,7 +72,7 @@ export const requestNotificationPermission = async () => {
               title: '🔔 Pengingat Puncak Aktif!',
               body: 'Notifikasi pengingat malam & tugas harian telah berhasil diaktifkan di HP Anda.',
               id: 1001,
-              smallIcon: 'ic_launcher',
+              smallIcon: 'ic_launcher_foreground',
               schedule: { at: new Date(Date.now() + 800) }
             }
           ]
@@ -132,7 +132,7 @@ export const checkDailyReminders = async (tasks = []) => {
                 title: motivasi.title,
                 body: motivasi.body,
                 id: 2100,
-                smallIcon: 'ic_launcher',
+                smallIcon: 'ic_launcher_foreground',
                 schedule: { on: { hour: 21, minute: 0 } }
               }
             ]
@@ -144,7 +144,7 @@ export const checkDailyReminders = async (tasks = []) => {
                 title: NOTIF_SELESAI.title,
                 body: NOTIF_SELESAI.body,
                 id: 2101,
-                smallIcon: 'ic_launcher',
+                smallIcon: 'ic_launcher_foreground',
                 schedule: { on: { hour: 21, minute: 0 } }
               }
             ]
@@ -158,7 +158,7 @@ export const checkDailyReminders = async (tasks = []) => {
                 title: motivasi.title,
                 body: motivasi.body,
                 id: 2100,
-                smallIcon: 'ic_launcher',
+                smallIcon: 'ic_launcher_foreground',
                 schedule: { on: { hour: 21, minute: 0 } }
               }
             ]
