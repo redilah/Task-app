@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Puncak - Aplikasi Tugas Harian & Rekap Bulanan</title>
+    <meta name="description" content="Puncak - Aplikasi manajemen tugas harian dan tugas sekolah/kuliah dengan rekap bulanan interaktif." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+      /* === Splash Screen 1 Lapis Bergaya Grab === */
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        background-color: #0f172a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        /* Tidak ada transition disini — transisi dikontrol via JS class */
+      }
+
+      /* Teks "Puncak" tampil instan dari milidetik pertama */
+      #app-splash .splash-title {
+        color: #ffffff;
+        font-size: 2.5rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        opacity: 1;
+        transform: scale(1) translateY(0px);
+      }
+
+      /* Fase 1: Fade-in + subtle scale-up saat masuk (0 → 1 opacity, scale 0.92 → 1) */
+      @keyframes splashFadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.92) translateY(0px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0px);
+        }
+      }
+
+      /* Fase 2: Slide-down + fade-out saat keluar (Grab-style exit ke bawah) */
+      #app-splash.splash-exit {
+        transition: opacity 0.45s ease-in;
+        opacity: 0;
+      }
+      #app-splash.splash-exit .splash-title {
+        animation: splashSlideDown 0.45s cubic-bezier(0.4, 0, 1, 1) forwards;
+      }
+      @keyframes splashSlideDown {
+        from {
+          opacity: 1;
+          transform: scale(1) translateY(0px);
+        }
+        to {
+          opacity: 0;
+          transform: scale(0.95) translateY(60px);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-slate-900 selection:text-white">
+    <!-- Splash Screen 1 Lapis Bergaya Grab: Hanya Teks "Puncak" Putih di Latar Gelap -->
+    <div id="app-splash">
+      <span class="splash-title">Puncak</span>
+    </div>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

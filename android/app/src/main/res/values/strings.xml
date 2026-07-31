@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Puncak</string>
+    <string name="title_activity_main">Puncak</string>
+    <string name="package_name">com.puncak.app</string>
+    <string name="custom_url_scheme">com.puncak.app</string>
+</resources>
