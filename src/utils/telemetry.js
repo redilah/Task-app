@@ -2,7 +2,8 @@ import { isNative } from './notifications';
 import { CURRENT_VERSION_CODE, CURRENT_VERSION_NAME } from './version';
 
 const FIREBASE_PROJECT_ID = 'regalia-senpai-app';
-const FIRESTORE_URL = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/puncak_telemetry`;
+const FIREBASE_API_KEY = 'AIzaSyBhaSgR4Pc4ctnZ_NoTkVVOIPsegPHwvqE';
+const FIRESTORE_BASE_URL = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/puncak_telemetry`;
 
 // Dapatkan atau buat Persistent Device ID unik untuk perangkat ini
 export const getDeviceId = () => {
@@ -55,8 +56,20 @@ export const sendTelemetrySignal = async (tasks = [], activeTab = 'dashboard') =
       }
     };
 
-    // Patch/Upsert dokumen per ID Perangkat di Firestore
-    const documentUrl = `${FIRESTORE_URL}/${deviceId}`;
+    // Update mask field paths untuk REST API PATCH Firestore
+    const fieldPaths = [
+      'updateMask.fieldPaths=deviceId',
+      'updateMask.fieldPaths=installDate',
+      'updateMask.fieldPaths=lastSeenDate',
+      'updateMask.fieldPaths=appVersion',
+      'updateMask.fieldPaths=taskCount',
+      'updateMask.fieldPaths=activeTab',
+      'updateMask.fieldPaths=platform',
+      'updateMask.fieldPaths=updatedAtMs'
+    ].join('&');
+
+    const documentUrl = `${FIRESTORE_BASE_URL}/${deviceId}?key=${FIREBASE_API_KEY}&${fieldPaths}`;
+    
     await fetch(documentUrl, {
       method: 'PATCH',
       headers: {
@@ -65,7 +78,6 @@ export const sendTelemetrySignal = async (tasks = [], activeTab = 'dashboard') =
       body: JSON.stringify(payload)
     });
   } catch (err) {
-    // Telemetri berjalan senyap di background tanpa mengganggu user
     console.warn('Telemetry sync note:', err);
   }
 };
@@ -73,7 +85,8 @@ export const sendTelemetrySignal = async (tasks = [], activeTab = 'dashboard') =
 // Ambil Seluruh Data Pengguna untuk Dashboard Admin (Auto-Refresh 1 Jam)
 export const fetchAllUsersTelemetry = async () => {
   try {
-    const response = await fetch(FIRESTORE_URL);
+    const fetchUrl = `${FIRESTORE_BASE_URL}?key=${FIREBASE_API_KEY}`;
+    const response = await fetch(fetchUrl);
     if (!response.ok) throw new Error('Gagal mengambil data dari Firebase');
     const data = await response.json();
 
