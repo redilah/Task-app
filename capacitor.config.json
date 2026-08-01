@@ -14,7 +14,7 @@
       "showSpinner": false
     },
     "LocalNotifications": {
-      "smallIcon": "ic_launcher_foreground",
+      "smallIcon": "ic_stat_puncak",
       "iconColor": "#0F172A"
     }
   }

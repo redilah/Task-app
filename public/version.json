@@ -1,6 +1,6 @@
 {
-  "versionCode": 7,
-  "versionName": "1.0.6",
+  "versionCode": 9,
+  "versionName": "1.0.8",
   "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk",
-  "releaseNotes": "Pembaruan versi 1.0.6 (Code 7): Perbaikan otentikasi Firebase Telemetry real-time REST API dengan API Key & updateMask, Splash Screen 3s animasi full slide-down, tata letak iPad/Tablet, dan Dashboard Admin."
+  "releaseNotes": "Pembaruan versi 1.0.8 (Code 9): Logo brand Puncak baru, perbaikan suara notifikasi kicau burung custom, dan aktivasi real-time Firestore Telemetry Dashboard."
 }

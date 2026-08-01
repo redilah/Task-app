@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <!-- Adaptive icon foreground: mountain centered in 66% safe zone -->
+  <!-- Safe zone = center 676px of 1024px, offset = 174px -->
+  <g transform="translate(174, 174) scale(6.76)" stroke="#0F172A" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Base Line -->
+    <path d="M 12 85 L 88 85" />
+    <!-- Main Mountain Contour -->
+    <path d="M 12 85 L 30 55 L 38 64 L 50 16 L 62 64 L 70 52 L 88 85" />
+    <!-- Ridge Lines -->
+    <path d="M 30 55 L 38 64" />
+    <path d="M 50 38 L 62 64" />
+  </g>
+</svg>

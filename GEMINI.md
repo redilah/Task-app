@@ -26,5 +26,14 @@ DILARANG langsung build APK tanpa konfirmasi localhost dari user terlebih dahulu
 
 Setiap selesai me-render/kompilasi APK baru (`gradlew assembleDebug`), file APK disalin HANYA ke lokasi-lokasi berikut:
 - `Puncak.apk` di root proyek (wajib untuk GitHub Raw auto-update).
-- `public/Puncak.apk` dan `dist/Puncak.apk` (wajib untuk web bundle).
+- `dist/Puncak.apk` (wajib untuk Netlify web download).
 - **HANYA 1 tempat di Desktop**: `C:\Users\GC\Downloads\OneDrive\Desktop\Puncak App\Puncak.apk` (DILARANG membuat salinan ganda di Desktop luar agar Desktop tetap rapi).
+
+## Larangan Recursive Bundling APK (WAJIB)
+
+**DILARANG KERAS** meletakkan file `Puncak.apk` di dalam folder `public/`. Alasan:
+- Vite otomatis menyalin semua isi `public/` ke `dist/` saat `npm run build`.
+- `npx cap sync android` menyalin semua isi `dist/` ke `android/app/src/main/assets/public/`.
+- Akibatnya, APK **memuat dirinya sendiri** (recursive bundling) → ukuran membengkak dari ~4 MB menjadi ~20 MB.
+
+Mekanisme in-app update menggunakan URL remote (GitHub Raw / Netlify), **bukan** file lokal di dalam bundle. Jadi `Puncak.apk` di `public/` tidak diperlukan.

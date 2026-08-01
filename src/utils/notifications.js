@@ -4,7 +4,7 @@ import { getTodayStr } from './dateUtils';
 import { playBirdChirp } from './audio';
 
 const NOTIF_KEY = 'puncak_notifications_enabled';
-const CHANNEL_ID = 'puncak_notifications_channel';
+const CHANNEL_ID = 'puncak_notifications_channel_v2';
 const EMPTY_NOTIF_ID = 1010;
 
 // Daftar pesan motivasi pedas untuk tugas belum selesai jam 19:00 (7 Malam)

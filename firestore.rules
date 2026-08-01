@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Aturan khusus untuk telemetri aplikasi Puncak
+    match /puncak_telemetry/{docId} {
+      // Mengizinkan Dashboard Admin membaca data telemetri
+      allow read: if true;
+      
+      // Mengizinkan aplikasi Puncak mengirim/meng-update data telemetri
+      // Hanya bidang (fields) resmi yang diperbolehkan
+      allow create, update: if request.resource.data.keys().hasOnly([
+        'deviceId', 'installDate', 'lastSeenDate', 'appVersion',
+        'taskCount', 'activeTab', 'platform', 'updatedAtMs'
+      ]);
+      
+      // Menolak penghapusan data dari sisi client
+      allow delete: if false;
+    }
+  }
+}
