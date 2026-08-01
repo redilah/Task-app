@@ -15,6 +15,24 @@ export const getDeviceId = () => {
   return id;
 };
 
+// Helper parser tanggal & jam instalasi Indonesia ke Milliseconds timestamp
+export const parseInstallDateToMs = (dateStr, installDateMs) => {
+  if (installDateMs && !isNaN(installDateMs) && installDateMs > 0) {
+    return installDateMs;
+  }
+  if (!dateStr || typeof dateStr !== 'string') return 0;
+  
+  try {
+    // Matches "01/08/2026 jam 10:20:00 WIB" or "01/08/2026 jam 10.17.16 WIB"
+    const match = dateStr.match(/(\d{2})\/(\d{2})\/(\d{4})\s+jam\s+(\d{2})[:.](\d{2})[:.](\d{2})/i);
+    if (match) {
+      const [_, day, month, year, hour, minute, second] = match;
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute), parseInt(second)).getTime();
+    }
+  } catch (e) {}
+  return 0;
+};
+
 // Dapatkan atau buat Tanggal & Jam Pertama Instalasi
 export const getInstallDateTime = () => {
   let installTime = localStorage.getItem('puncak_install_datetime');
@@ -24,8 +42,18 @@ export const getInstallDateTime = () => {
     const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     installTime = `${dateStr} jam ${timeStr} WIB`;
     localStorage.setItem('puncak_install_datetime', installTime);
+    localStorage.setItem('puncak_install_datetimems', now.getTime().toString());
   }
   return installTime;
+};
+
+export const getInstallDateTimeMs = () => {
+  let ms = localStorage.getItem('puncak_install_datetimems');
+  if (!ms) {
+    getInstallDateTime();
+    ms = localStorage.getItem('puncak_install_datetimems');
+  }
+  return parseInt(ms || '0');
 };
 
 // Kirim Telemetri / Pembaruan Status Perangkat ke Firebase Firestore
@@ -33,6 +61,7 @@ export const sendTelemetrySignal = async (tasks = [], activeTab = 'dashboard') =
   try {
     const deviceId = getDeviceId();
     const installDate = getInstallDateTime();
+    const installDateMs = getInstallDateTimeMs();
 
     const now = new Date();
     const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -47,6 +76,7 @@ export const sendTelemetrySignal = async (tasks = [], activeTab = 'dashboard') =
       fields: {
         deviceId: { stringValue: deviceId },
         installDate: { stringValue: installDate },
+        installDateMs: { integerValue: installDateMs },
         lastSeenDate: { stringValue: lastSeenDate },
         appVersion: { stringValue: versionStr },
         taskCount: { integerValue: taskCount },
@@ -60,6 +90,7 @@ export const sendTelemetrySignal = async (tasks = [], activeTab = 'dashboard') =
     const fieldPaths = [
       'updateMask.fieldPaths=deviceId',
       'updateMask.fieldPaths=installDate',
+      'updateMask.fieldPaths=installDateMs',
       'updateMask.fieldPaths=lastSeenDate',
       'updateMask.fieldPaths=appVersion',
       'updateMask.fieldPaths=taskCount',
@@ -92,12 +123,17 @@ export const fetchAllUsersTelemetry = async () => {
 
     if (!data.documents) return [];
 
-    return data.documents.map(doc => {
+    const parsedList = data.documents.map(doc => {
       const fields = doc.fields || {};
+      const installDateStr = fields.installDate?.stringValue || 'Tidak Diketahui';
+      const rawMs = parseInt(fields.installDateMs?.integerValue || 0);
+      const computedMs = parseInstallDateToMs(installDateStr, rawMs);
+
       return {
         id: doc.name.split('/').pop(),
         deviceId: fields.deviceId?.stringValue || 'Unknown',
-        installDate: fields.installDate?.stringValue || 'Tidak Diketahui',
+        installDate: installDateStr,
+        installDateMs: computedMs,
         lastSeenDate: fields.lastSeenDate?.stringValue || 'Tidak Diketahui',
         appVersion: fields.appVersion?.stringValue || 'v1.0.0',
         taskCount: parseInt(fields.taskCount?.integerValue || 0),
@@ -106,6 +142,11 @@ export const fetchAllUsersTelemetry = async () => {
         updatedAtMs: parseInt(fields.updatedAtMs?.integerValue || 0)
       };
     });
+
+    // Urutkan secara beraturan berdasarkan Waktu Pertama Instalasi (Ascending: Yang pertama kali instal = No. 1)
+    parsedList.sort((a, b) => a.installDateMs - b.installDateMs);
+
+    return parsedList;
   } catch (err) {
     console.error('Error fetching admin telemetry:', err);
     return [];

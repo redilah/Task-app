@@ -80,7 +80,7 @@ export default function Navbar({
       {onOpenAddTask && (
         <div className="2xl:hidden fixed bottom-20 right-5 sm:right-8 md:right-12 z-50">
           <button
-            onClick={onOpenAddTask}
+            onClick={() => onOpenAddTask()}
             className="w-12 h-12 sm:w-14 sm:h-14 bg-[#ffffff] hover:bg-slate-50 text-slate-400 hover:text-slate-600 rounded-full flex items-center justify-center shadow-lg border border-slate-200/80 active:scale-95 transition-all"
             title="Tambah Tugas Baru"
             aria-label="Tambah Tugas Baru"

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Calendar, CheckCircle2, XCircle, BarChart3, TrendingUp, 
-  ChevronLeft, ChevronRight, FileText, Sparkles 
+  ChevronLeft, ChevronRight, FileText
 } from 'lucide-react';
 import { formatDateNumeric } from '../utils/dateUtils';
 
@@ -9,7 +9,6 @@ export default function MonthlyRecap({ tasks = [] }) {
   const currentMonthStr = new Date().toISOString().slice(0, 7); // YYYY-MM
   const [selectedMonth, setSelectedMonth] = useState(currentMonthStr);
 
-  // Solusi Perbaikan Bug Navigasi Bulan (Bebas UTC Timezone Shift)
   const handlePrevMonth = () => {
     const [year, month] = selectedMonth.split('-').map(Number);
     const prevDate = new Date(year, month - 2, 1);
@@ -26,12 +25,13 @@ export default function MonthlyRecap({ tasks = [] }) {
     setSelectedMonth(`${y}-${m}`);
   };
 
-  // Filter tasks for the selected month
+  // Filter tasks untuk bulan terpilih (Utama)
   const monthTasks = tasks.filter(task => {
     if (!task.date) return task.createdMonth === selectedMonth;
     return task.date.slice(0, 7) === selectedMonth;
   });
 
+  // Statistik Utama Bulan Terpilih
   const totalCreated = monthTasks.length;
   const totalCompleted = monthTasks.filter(t => t.completed).length;
   const totalUncompleted = totalCreated - totalCompleted;
@@ -39,6 +39,7 @@ export default function MonthlyRecap({ tasks = [] }) {
 
   // Format Month Title (Indonesian)
   const formatMonthTitle = (monthStr) => {
+    if (!monthStr) return '';
     const [year, month] = monthStr.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1, 1);
     return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
@@ -58,11 +59,8 @@ export default function MonthlyRecap({ tasks = [] }) {
   monthTasks.forEach(t => {
     if (t.date && dailyActivityMap[t.date]) {
       dailyActivityMap[t.date].total += 1;
-      if (t.completed) {
-        dailyActivityMap[t.date].completed += 1;
-      } else {
-        dailyActivityMap[t.date].uncompleted += 1;
-      }
+      if (t.completed) dailyActivityMap[t.date].completed += 1;
+      else dailyActivityMap[t.date].uncompleted += 1;
     }
   });
 
@@ -168,7 +166,7 @@ export default function MonthlyRecap({ tasks = [] }) {
         </div>
       </div>
 
-      {/* Daily Activity Chart Section (Fix Perbaikan Tampilan Bar Grafik) */}
+      {/* Daily Activity Chart Section */}
       <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-sm mb-6">
         <div className="flex items-center justify-between mb-4 pb-3">
           <div className="flex items-center gap-2">
@@ -188,14 +186,11 @@ export default function MonthlyRecap({ tasks = [] }) {
           </div>
         ) : (
           <div className="pt-4 pb-2">
-            {/* Height-constrained scrollable container for 28-31 bars */}
             <div className="h-48 flex items-end justify-between gap-1 sm:gap-1.5 overflow-x-auto pb-2 scrollbar-thin">
               {dailyActivityArray.map((item) => {
                 const total = item.total;
                 const completed = item.completed;
-                const uncompleted = item.uncompleted;
                 
-                // Calculate height percentage relative to max tasks in a single day
                 const barHeightPercent = total > 0 ? Math.max(Math.round((total / maxTasksInDay) * 100), 20) : 0;
                 const completedRatio = total > 0 ? (completed / total) * 100 : 0;
 
@@ -204,19 +199,16 @@ export default function MonthlyRecap({ tasks = [] }) {
                     key={item.day} 
                     className="flex flex-col items-center flex-1 min-w-[16px] h-full justify-end group relative"
                   >
-                    {/* Tooltip on hover */}
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-9 bg-slate-900 text-white text-[10px] py-1 px-2 rounded-md pointer-events-none whitespace-nowrap z-30 shadow-md">
                       Tgl {item.day}: {completed} Selesai / {total} Total
                     </div>
 
-                    {/* Count badge on top of bar */}
                     {total > 0 && (
                       <span className="text-[10px] font-bold text-slate-700 mb-1">
                         {total}
                       </span>
                     )}
 
-                    {/* Vertical Bar Track */}
                     <div 
                       className="w-full max-w-[20px] bg-slate-100 rounded-t-md flex items-end overflow-hidden transition-all duration-300 relative"
                       style={{ height: total > 0 ? `${barHeightPercent}%` : '4px' }}
@@ -233,7 +225,6 @@ export default function MonthlyRecap({ tasks = [] }) {
                       )}
                     </div>
 
-                    {/* Day Number Label */}
                     <span className={`text-[10px] font-semibold mt-1.5 ${
                       total > 0 ? 'text-slate-900 font-bold' : 'text-slate-400'
                     }`}>
@@ -244,7 +235,6 @@ export default function MonthlyRecap({ tasks = [] }) {
               })}
             </div>
 
-            {/* Legend */}
             <div className="flex items-center justify-center gap-6 mt-4 pt-3 text-xs">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-xs bg-emerald-500"></div>

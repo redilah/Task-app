@@ -1,6 +1,6 @@
 {
-  "versionCode": 9,
-  "versionName": "1.0.8",
+  "versionCode": 10,
+  "versionName": "1.0.9",
   "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk",
-  "releaseNotes": "Pembaruan versi 1.0.8 (Code 9): Logo brand Puncak baru, perbaikan suara notifikasi kicau burung custom, dan aktivasi real-time Firestore Telemetry Dashboard."
+  "releaseNotes": "Pembaruan versi 1.0.9 (Code 10): Kunci centang otomatis >24j dan pembatasan penambahan tugas untuk hari/bulan yang sudah lewat."
 }

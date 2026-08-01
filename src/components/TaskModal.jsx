@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2, AlertCircle } from 'lucide-react';
-import { getTodayStr } from '../utils/dateUtils';
+import { getTodayStr, isPastDate } from '../utils/dateUtils';
 
 export default function TaskModal({ isOpen, onClose, onSave, editingTask = null }) {
   const todayStr = getTodayStr();
@@ -30,14 +30,21 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
     e.preventDefault();
     if (!title.trim()) return;
 
+    if (isPastDate(date)) {
+      alert('Tidak dapat menambahkan tugas untuk hari/bulan yang sudah lewat');
+      return;
+    }
+
+    const nowTs = Date.now();
     onSave({
-      id: editingTask ? editingTask.id : `t-${Date.now()}`,
+      id: editingTask ? editingTask.id : `t-${nowTs}`,
       title: title.trim(),
       category: category.trim(),
       priority,
       date,
       completed: editingTask ? editingTask.completed : false,
-      createdMonth: date.slice(0, 7)
+      createdMonth: date.slice(0, 7),
+      createdAt: editingTask ? (editingTask.createdAt || nowTs) : nowTs
     });
 
     onClose();
@@ -97,6 +104,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
               <input
                 type="date"
                 required
+                min={todayStr}
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all shadow-xs"

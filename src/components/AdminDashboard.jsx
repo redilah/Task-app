@@ -67,6 +67,21 @@ export default function AdminDashboard({ onBackToApp }) {
   const dashboardCount = usersData.filter(u => u.activeTab === 'dashboard').length;
   const recapCount = usersData.filter(u => u.activeTab === 'recap').length;
 
+  const [platformFilter, setPlatformFilter] = useState('all'); // 'all', 'android', 'web'
+
+  // Filter berdasarkan platform
+  const filteredUsersData = usersData.filter(user => {
+    if (platformFilter === 'android') return user.platform === 'Android App';
+    if (platformFilter === 'web') return user.platform === 'Web Browser';
+    return true;
+  });
+
+  // Urutkan MUTLAK beraturan berdasarkan Waktu Pertama Instalasi (Paling Pertama Instal = No 1)
+  const sortedUsersData = [...filteredUsersData].sort((a, b) => a.installDateMs - b.installDateMs);
+
+  const androidPlatformCount = usersData.filter(u => u.platform === 'Android App').length;
+  const webPlatformCount = usersData.filter(u => u.platform === 'Web Browser').length;
+
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans pb-16 selection:bg-slate-900 selection:text-white">
       {/* Header Admin Bar */}
@@ -138,8 +153,10 @@ export default function AdminDashboard({ onBackToApp }) {
             <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">
               {loading ? '...' : totalUsers}
             </div>
-            <p className="text-xs text-slate-500 mt-1 font-medium">
-              Perangkat terpasang & aktif
+            <p className="text-xs text-slate-500 mt-1 font-medium flex items-center gap-2">
+              <span>Android: <strong>{androidPlatformCount}</strong></span>
+              <span>•</span>
+              <span>Web: <strong>{webPlatformCount}</strong></span>
             </p>
           </div>
 
@@ -203,19 +220,46 @@ export default function AdminDashboard({ onBackToApp }) {
 
         {/* Tabel Detail Per Perangkat / User (Dengan Indikator Tanggal & Jam Instalasi) */}
         <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
-          <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+          <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <Smartphone className="w-4 h-4 text-slate-500" />
                 Daftar Perangkat Terinstal & Waktu Instalasi
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Pemantauan tanggal & jam pertama instalasi pengguna, versi APK, serta statistik aktivitasnya.
+                Diurutkan beraturan berdasarkan waktu pertama kali aplikasi diinstal oleh pengguna.
               </p>
             </div>
-            <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-xl">
-              {totalUsers} Perangkat
-            </span>
+            
+            <div className="flex items-center gap-2.5">
+              {/* Filter Platform */}
+              <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/60 text-xs font-semibold text-slate-600">
+                <button
+                  onClick={() => setPlatformFilter('all')}
+                  className={`px-3 py-1 rounded-lg transition-all ${
+                    platformFilter === 'all' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'hover:text-slate-900'
+                  }`}
+                >
+                  Semua ({totalUsers})
+                </button>
+                <button
+                  onClick={() => setPlatformFilter('android')}
+                  className={`px-3 py-1 rounded-lg transition-all ${
+                    platformFilter === 'android' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'hover:text-slate-900'
+                  }`}
+                >
+                  Android ({androidPlatformCount})
+                </button>
+                <button
+                  onClick={() => setPlatformFilter('web')}
+                  className={`px-3 py-1 rounded-lg transition-all ${
+                    platformFilter === 'web' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'hover:text-slate-900'
+                  }`}
+                >
+                  Web ({webPlatformCount})
+                </button>
+              </div>
+            </div>
           </div>
 
           {loading ? (
@@ -223,7 +267,7 @@ export default function AdminDashboard({ onBackToApp }) {
               <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-slate-300" />
               Mengambil data telemetri dari Firebase...
             </div>
-          ) : usersData.length === 0 ? (
+          ) : sortedUsersData.length === 0 ? (
             <div className="p-12 text-center text-slate-400 text-xs font-medium">
               Belum ada sinyal data pengguna yang masuk dari Firebase.
             </div>
@@ -242,7 +286,7 @@ export default function AdminDashboard({ onBackToApp }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium">
-                  {usersData.map((user, idx) => {
+                  {sortedUsersData.map((user, idx) => {
                     const isUpdated = user.appVersion === currentVersionStr;
                     return (
                       <tr key={user.id || idx} className="hover:bg-slate-50/80 transition-all">

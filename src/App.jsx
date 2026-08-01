@@ -15,10 +15,12 @@ import {
 } from './utils/notifications';
 import { checkForAppUpdates } from './utils/version';
 import { sendTelemetrySignal } from './utils/telemetry';
+import { isTaskExpired, isPastDate, getTodayStr } from './utils/dateUtils';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' or 'recap'
   const [tasks, setTasks] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(() => getTodayStr());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [notifEnabled, setNotifEnabled] = useState(false);
@@ -92,6 +94,11 @@ export default function App() {
   const handleToggleTask = (id) => {
     const updated = tasks.map(t => {
       if (t.id === id) {
+        // Mencegah toggle HANYA JIKA tugas sudah kadaluwarsa (>24 jam dari dibuat)
+        if (isTaskExpired(t)) {
+          return t;
+        }
+        // Jika masih dalam 24 jam, bebas toggle completed (true / false)
         return { ...t, completed: !t.completed };
       }
       return t;
@@ -117,7 +124,12 @@ export default function App() {
     updateTasks(updated);
   };
 
-  const handleOpenAddTask = () => {
+  const handleOpenAddTask = (targetDate) => {
+    const checkDate = targetDate || selectedDate || getTodayStr();
+    if (isPastDate(checkDate)) {
+      alert('Tidak dapat menambahkan tugas untuk hari/bulan yang sudah lewat');
+      return;
+    }
     setEditingTask(null);
     setIsModalOpen(true);
   };
@@ -153,6 +165,8 @@ export default function App() {
         {activeTab === 'dashboard' && (
           <DailyDashboard 
             tasks={tasks}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
             onToggleTask={handleToggleTask}
             onDeleteTask={handleDeleteTask}
             onOpenAddTask={handleOpenAddTask}
