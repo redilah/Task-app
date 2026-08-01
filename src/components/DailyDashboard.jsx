@@ -75,7 +75,7 @@ export default function DailyDashboard({
   const progressPercent = dayTotal > 0 ? Math.round((dayCompleted / dayTotal) * 100) : 0;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-24 md:pb-12">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 pt-6 pb-28 2xl:pb-12">
       {/* Top Header Card */}
       <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-sm mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

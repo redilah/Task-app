@@ -1,7 +1,6 @@
 {
-  "versionCode": 5,
-  "versionName": "1.0.4",
+  "versionCode": 6,
+  "versionName": "1.0.5",
   "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk",
-  "releaseNotes": "Pembaruan versi 1.0.4 (Code 5): Tombol bulat tambah tugas mobile, penomoran rincian bulanan, format tanggal DD/MM/YYYY, perbaikan auto refresh jam 00:00, microcopy psikologi, penyembunyian glitch scrollbar, & perbaikan notifikasi 21:00 suara kicau burung."
+  "releaseNotes": "Pembaruan versi 1.0.5 (Code 6): Logo Puncak melayang tanpa kotak background, Splash Screen 3 detik dengan animasi slide-down kontainer penuh, tata letak proporsional seluruh seri iPad/Tablet, serta Dashboard Pemantauan Admin Real-Time terpusat di Google Firebase."
 }
-

@@ -70,7 +70,7 @@ export default function MonthlyRecap({ tasks = [] }) {
   const maxTasksInDay = Math.max(...dailyActivityArray.map(a => a.total), 1);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-28 sm:pb-12">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 pt-6 pb-28 2xl:pb-12">
       {/* Month Selector Banner */}
       <div className="bg-white p-5 rounded-2xl shadow-sm mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>

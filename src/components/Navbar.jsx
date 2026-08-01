@@ -1,5 +1,6 @@
 import React from 'react';
-import { Mountain, LayoutDashboard, Calendar, Bell, BellOff, Plus } from 'lucide-react';
+import { LayoutDashboard, Calendar, Bell, BellOff, Plus } from 'lucide-react';
+import PuncakLogo from './PuncakLogo';
 import { playBirdChirp } from '../utils/audio';
 
 export default function Navbar({ 
@@ -21,18 +22,17 @@ export default function Navbar({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div 
             onClick={() => setActiveTab('dashboard')}
-            className="flex items-center gap-2 cursor-pointer group"
+            className="flex items-center gap-2.5 cursor-pointer group"
           >
-            <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-xs transition-transform group-hover:scale-105">
-              <Mountain className="w-5 h-5 text-emerald-400" />
-            </div>
+            {/* Logo Puncak Melayang (Floating Icon Tanpa Kotak Latar Belakang) */}
+            <PuncakLogo className="w-8 h-8 text-slate-900 transition-transform group-hover:scale-105" />
             <div>
               <span className="font-bold text-xl text-slate-900 tracking-tight">Puncak</span>
             </div>
           </div>
 
-          {/* Desktop Nav Links (Hanya di Layar Tablet/Desktop: sm:flex) */}
-          <div className="hidden sm:flex items-center gap-3">
+          {/* Desktop Nav Links (Hanya di Layar PC/Monitor Besar: 2xl:flex / 1536px+) */}
+          <div className="hidden 2xl:flex items-center gap-3">
             <nav className="flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl shadow-xs">
               <button
                 onClick={() => setActiveTab('dashboard')}
@@ -76,24 +76,24 @@ export default function Navbar({
         </div>
       </header>
 
-      {/* Floating Circle Plus Button for Mobile (Pojok Kanan Bawah di atas Rekap Bulanan, bentuk bulat, background #ffffff, plus abu-abu lembut text-slate-400, TANPA TEKS) */}
+      {/* Floating Circle Plus Button untuk Mobile & Seluruh Seri iPad / Tablet (Pojok Kanan Bawah) */}
       {onOpenAddTask && (
-        <div className="sm:hidden fixed bottom-20 right-4 z-50">
+        <div className="2xl:hidden fixed bottom-20 right-5 sm:right-8 md:right-12 z-50">
           <button
             onClick={onOpenAddTask}
-            className="w-12 h-12 bg-[#ffffff] hover:bg-slate-50 text-slate-400 hover:text-slate-600 rounded-full flex items-center justify-center shadow-lg border border-slate-200/80 active:scale-95 transition-all"
+            className="w-12 h-12 sm:w-14 sm:h-14 bg-[#ffffff] hover:bg-slate-50 text-slate-400 hover:text-slate-600 rounded-full flex items-center justify-center shadow-lg border border-slate-200/80 active:scale-95 transition-all"
             title="Tambah Tugas Baru"
             aria-label="Tambah Tugas Baru"
           >
-            <Plus className="w-6 h-6 stroke-[2.5]" />
+            <Plus className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" />
           </button>
         </div>
       )}
 
-      {/* Mobile Bottom Navigation Bar (Ditaruh di Sebelah Kiri Dashboard Khusus Layar HP) */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg px-4 py-2 shadow-lg">
-        <div className="grid grid-cols-3 items-center text-center">
-          {/* 1. Tombol Notifikasi Pengingat (Di Sebelah Kiri Dashboard - Kicau Ganda) */}
+      {/* Mobile & iPad / Tablet Bottom Navigation Bar (Bawah Layar HP & iPad Seri Apapun: 2xl:hidden) */}
+      <nav className="2xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg px-4 py-2.5 shadow-lg border-t border-slate-200/60">
+        <div className="max-w-md mx-auto grid grid-cols-3 items-center text-center">
+          {/* 1. Tombol Notifikasi Pengingat */}
           <button
             onClick={handleNotifClick}
             className={`flex flex-col items-center gap-1 py-1 rounded-xl transition-all ${
@@ -101,11 +101,11 @@ export default function Navbar({
             }`}
           >
             {notifEnabled ? (
-              <Bell className="w-5 h-5 text-emerald-600 fill-emerald-100" />
+              <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 fill-emerald-100" />
             ) : (
-              <BellOff className="w-5 h-5" />
+              <BellOff className="w-5 h-5 sm:w-6 sm:h-6" />
             )}
-            <span className="text-[10px] font-semibold">{notifEnabled ? 'Notif Aktif' : 'Notifikasi'}</span>
+            <span className="text-[10px] sm:text-xs font-semibold">{notifEnabled ? 'Notif Aktif' : 'Notifikasi'}</span>
           </button>
 
           {/* 2. Dashboard Harian */}
@@ -115,8 +115,8 @@ export default function Navbar({
               activeTab === 'dashboard' ? 'text-slate-900 font-bold' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
-            <LayoutDashboard className="w-5 h-5" />
-            <span className="text-[10px] font-semibold">Dashboard</span>
+            <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-[10px] sm:text-xs font-semibold">Dashboard</span>
           </button>
 
           {/* 3. Rekap Bulanan */}
@@ -126,8 +126,8 @@ export default function Navbar({
               activeTab === 'recap' ? 'text-slate-900 font-bold' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
-            <Calendar className="w-5 h-5" />
-            <span className="text-[10px] font-semibold">Rekap Bulanan</span>
+            <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-[10px] sm:text-xs font-semibold">Rekap Bulanan</span>
           </button>
         </div>
       </nav>

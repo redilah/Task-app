@@ -10,11 +10,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 );
 
 // Grab-style Splash Screen Exit:
-// 1. Teks "Puncak" bertahan selama 3 detik (smooth, tidak terburu-buru)
-// 2. Lalu slide-down + fade-out mulus ke bawah (persis Grab)
+// 1. Teks "Puncak" & Latar Gelap tampil selama 3 detik
+// 2. Lalu seluruh kontainer background splash screen slide-down + fade-out mulus ke bawah
 // 3. Hapus elemen dari DOM setelah animasi selesai
-const SPLASH_DURATION = 1200;     // 1.2 detik tampil instan lalu buka app
-const EXIT_DURATION   = 400;      // 0.4 detik animasi slide-down keluar
+const SPLASH_DURATION = 3000;     // 3.0 detik tampil tenang
+const EXIT_DURATION   = 450;      // 0.45 detik animasi slide-down keluar
 
 setTimeout(() => {
   const splash = document.getElementById('app-splash');

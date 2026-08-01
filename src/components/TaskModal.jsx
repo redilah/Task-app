@@ -68,7 +68,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
             <input
               type="text"
               required
-              placeholder="Target kemenanganmu hari ini: Selesaikan tugas prioritas utama"
+              placeholder="Target kemenanganmu hari ini apa?"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all shadow-xs"
@@ -83,7 +83,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
               </label>
               <input
                 type="text"
-                placeholder="Pencapaian, Belajar, Personal"
+                placeholder="Kerja, Pasangan, Belanja"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all shadow-xs"
