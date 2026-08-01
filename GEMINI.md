@@ -22,3 +22,9 @@ Untuk setiap perubahan kode baru, ikuti urutan pengujian berikut secara ketat:
 
 DILARANG langsung build APK tanpa konfirmasi localhost dari user terlebih dahulu, kecuali user secara eksplisit meminta untuk melewati tahap localhost.
 
+## Penempatan File APK (WAJIB)
+
+Setiap selesai me-render/kompilasi APK baru (`gradlew assembleDebug`), file APK disalin HANYA ke lokasi-lokasi berikut:
+- `Puncak.apk` di root proyek (wajib untuk GitHub Raw auto-update).
+- `public/Puncak.apk` dan `dist/Puncak.apk` (wajib untuk web bundle).
+- **HANYA 1 tempat di Desktop**: `C:\Users\GC\Downloads\OneDrive\Desktop\Puncak App\Puncak.apk` (DILARANG membuat salinan ganda di Desktop luar agar Desktop tetap rapi).
