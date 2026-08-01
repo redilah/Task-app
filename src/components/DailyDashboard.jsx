@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle2, Circle, Plus, Trash2, Edit3, Filter, 
   Calendar as CalendarIcon, Tag, AlertCircle, Sparkles, Search, Check 
 } from 'lucide-react';
+import { getTodayStr, formatDateNumeric } from '../utils/dateUtils';
 
 export default function DailyDashboard({ 
   tasks, 
@@ -11,12 +12,37 @@ export default function DailyDashboard({
   onOpenAddTask, 
   onOpenEditTask 
 }) {
-  const todayStr = new Date().toISOString().split('T')[0];
-  const [selectedDate, setSelectedDate] = useState(todayStr);
+  const [todayStr, setTodayStr] = useState(() => getTodayStr());
+  const [selectedDate, setSelectedDate] = useState(() => getTodayStr());
   const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'active', 'completed'
   const [filterPriority, setFilterPriority] = useState('all'); // 'all', 'high', 'medium', 'low'
   const [searchQuery, setSearchQuery] = useState('');
   const [showOnlyDate, setShowOnlyDate] = useState(true); // true = filter exact date, false = all dates
+
+  // Auto-refresh tanggal hari ini bila aplikasi kembali aktif (resume) atau pergantian jam 00:00
+  useEffect(() => {
+    const handleCheckDate = () => {
+      const currentRealToday = getTodayStr();
+      setTodayStr(prevToday => {
+        if (prevToday !== currentRealToday) {
+          // Jika tanggal berganti dan user sedang di tab 'Hari Ini', perbarui selectedDate ke tanggal baru
+          setSelectedDate(prevSel => (prevSel === prevToday ? currentRealToday : prevSel));
+          return currentRealToday;
+        }
+        return prevToday;
+      });
+    };
+
+    window.addEventListener('focus', handleCheckDate);
+    document.addEventListener('visibilitychange', handleCheckDate);
+    const timer = setInterval(handleCheckDate, 60000); // Check setiap 1 menit
+
+    return () => {
+      window.removeEventListener('focus', handleCheckDate);
+      document.removeEventListener('visibilitychange', handleCheckDate);
+      clearInterval(timer);
+    };
+  }, []);
 
   // Filtering tasks
   const filteredTasks = tasks.filter(task => {
@@ -59,7 +85,7 @@ export default function DailyDashboard({
               <span>Dashboard Tugas Harian</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-              {showOnlyDate ? (selectedDate === todayStr ? 'Hari Ini' : selectedDate) : 'Semua Tanggal'}
+              {showOnlyDate ? (selectedDate === todayStr ? 'Hari Ini' : formatDateNumeric(selectedDate)) : 'Semua Tanggal'}
             </h1>
           </div>
 
@@ -264,7 +290,7 @@ export default function DailyDashboard({
                   <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-1">
                     <span className="flex items-center gap-1">
                       <CalendarIcon className="w-3 h-3 text-slate-400" />
-                      {task.date}
+                      {formatDateNumeric(task.date)}
                     </span>
                   </div>
                 </div>

@@ -110,6 +110,7 @@ export default function App() {
         setActiveTab={setActiveTab} 
         notifEnabled={notifEnabled}
         onToggleNotification={handleToggleNotification}
+        onOpenAddTask={handleOpenAddTask}
       />
 
       {/* Main Content: Dashboard Harian atau Rekap Bulanan */}

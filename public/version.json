@@ -1,7 +1,7 @@
 {
-  "versionCode": 4,
-  "versionName": "1.0.3",
+  "versionCode": 5,
+  "versionName": "1.0.4",
   "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk",
-  "releaseNotes": "Pembaruan versi 1.0.3 (Code 4): Perbaikan crash NullPointerException pada tombol notifikasi Android."
+  "releaseNotes": "Pembaruan versi 1.0.4 (Code 5): Tombol bulat tambah tugas mobile, penomoran rincian bulanan, format tanggal DD/MM/YYYY, perbaikan auto refresh jam 00:00, microcopy psikologi, penyembunyian glitch scrollbar, & perbaikan notifikasi 21:00 suara kicau burung."
 }
 

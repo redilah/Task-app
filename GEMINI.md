@@ -18,6 +18,7 @@ Untuk setiap perubahan kode baru, ikuti urutan pengujian berikut secara ketat:
 
 1. Jalankan `npm run dev` → Uji perubahan di `http://localhost:3000`
 2. Tunggu konfirmasi eksplisit dari user bahwa tampilan localhost sudah benar dan sesuai
-3. Baru jalankan pipeline build lengkap: `npm run build` → `npx cap sync android` → `gradlew assembleDebug` → copy APK → deploy Netlify
+3. Baru jalankan pipeline build lengkap: `npm run build` → `npx cap sync android` → `gradlew assembleDebug` → copy APK (deploy ke Netlify HANYA dilakukan jika diminta secara manual oleh user)
 
-DILARANG langsung build APK atau deploy ke Netlify tanpa konfirmasi localhost dari user terlebih dahulu, kecuali user secara eksplisit meminta untuk melewati tahap localhost.
+DILARANG langsung build APK tanpa konfirmasi localhost dari user terlebih dahulu, kecuali user secara eksplisit meminta untuk melewati tahap localhost.
+

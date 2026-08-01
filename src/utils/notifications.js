@@ -1,5 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { getTodayStr } from './dateUtils';
+import { playBirdChirp } from './audio';
 
 const NOTIF_KEY = 'puncak_notifications_enabled';
 const CHANNEL_ID = 'puncak_notifications_channel';
@@ -51,17 +53,18 @@ export const setNotificationState = (enabled) => {
   }
 };
 
-// Buat notification channel untuk Android 8.0+
+// Buat notification channel untuk Android 8.0+ dengan Suara Kicau Burung Kustom (res_custom_notification)
 const createNotificationChannel = async () => {
   if (!isNative()) return;
   try {
     await LocalNotifications.createChannel({
       id: CHANNEL_ID,
       name: 'Pengingat Puncak',
-      description: 'Pengingat tugas harian Puncak',
-      importance: 4,
+      description: 'Pengingat tugas harian Puncak dengan suara kicau burung',
+      importance: 5, // High Importance (Suara + Pop-up Banner)
       visibility: 1,
-      sound: 'res_custom_notification'
+      sound: 'res_custom_notification',
+      vibration: true
     });
   } catch (e) {
     console.warn('Failed to create notification channel:', e);
@@ -84,16 +87,17 @@ export const requestNotificationPermission = async () => {
       if (status.display === 'granted') {
         setNotificationState(true);
 
-        // Konfirmasi aktivasi dengan ikon ic_launcher
+        // Konfirmasi aktivasi dengan ikon ic_launcher dan Suara Kicau Burung (res_custom_notification)
         try {
           await LocalNotifications.schedule({
             notifications: [
               {
                 title: '🔔 Pengingat Puncak Aktif!',
-                body: 'Notifikasi pengingat malam & tugas harian telah berhasil diaktifkan di HP Anda.',
+                body: 'Notifikasi pengingat malam & tugas harian telah berhasil diaktifkan dengan suara kicau burung.',
                 id: 1001,
                 smallIcon: 'ic_launcher',
                 channelId: CHANNEL_ID,
+                sound: 'res_custom_notification',
                 schedule: { at: new Date(Date.now() + 800) }
               }
             ]
@@ -111,13 +115,14 @@ export const requestNotificationPermission = async () => {
       return false;
     }
   } else {
-    // 💻 WEB BROWSER — Notifikasi web standar
+    // 💻 WEB BROWSER — Notifikasi web standar dengan Web Audio API Kicau Burung
     if (typeof window === 'undefined' || !('Notification' in window)) return false;
     try {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
         setNotificationState(true);
         try {
+          playBirdChirp(2); // Suara Kicau Burung Ganda
           new Notification('🔔 Pengingat Puncak Aktif!', {
             body: 'Notifikasi pengingat malam & tugas harian telah berhasil diaktifkan di Web Browser.'
           });
@@ -139,71 +144,62 @@ export const requestNotificationPermission = async () => {
 export const checkDailyReminders = async (tasks = []) => {
   if (!getNotificationState()) return;
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getTodayStr(); // Gunakan tanggal lokal WIB tanpa UTC shift
 
   if (isNative()) {
-    // 📱 Android Native: Jadwalkan notifikasi 21:00 setiap hari
+    // 📱 Android Native: Batalkan jadwal lama lalu jadwalkan ulang notifikasi jam 21:00 setiap hari
     try {
       await createNotificationChannel();
 
-      // Cek pending dengan safe optional chaining
-      const pending = await LocalNotifications.getPending();
-      const pendingList = pending?.notifications || [];
-      const alreadyScheduled = pendingList.some(n => n.id === 2100 || n.id === 2101);
-
-      if (!alreadyScheduled) {
-        const todayTasks = (tasks || []).filter(t => t.date === todayStr);
-        const hasUncompleted = todayTasks.some(t => !t.completed);
-
-        if (hasUncompleted) {
-          const motivasi = getRandomMotivasi();
-          await LocalNotifications.schedule({
-            notifications: [
-              {
-                title: motivasi.title,
-                body: motivasi.body,
-                id: 2100,
-                smallIcon: 'ic_launcher',
-                channelId: CHANNEL_ID,
-                schedule: { on: { hour: 21, minute: 0 } }
-              }
-            ]
-          });
-        } else if (todayTasks.length > 0) {
-          await LocalNotifications.schedule({
-            notifications: [
-              {
-                title: NOTIF_SELESAI.title,
-                body: NOTIF_SELESAI.body,
-                id: 2101,
-                smallIcon: 'ic_launcher',
-                channelId: CHANNEL_ID,
-                schedule: { on: { hour: 21, minute: 0 } }
-              }
-            ]
-          });
-        } else {
-          // Gak ada tugas sama sekali, beri pengingat motivasi
-          const motivasi = getRandomMotivasi();
-          await LocalNotifications.schedule({
-            notifications: [
-              {
-                title: motivasi.title,
-                body: motivasi.body,
-                id: 2100,
-                smallIcon: 'ic_launcher',
-                channelId: CHANNEL_ID,
-                schedule: { on: { hour: 21, minute: 0 } }
-              }
-            ]
-          });
-        }
+      // Bersihkan/batalkan jadwal lama (2100 & 2101) agar jadwal hari ini selalu fresh & ter-update
+      try {
+        await LocalNotifications.cancel({ notifications: [{ id: 2100 }, { id: 2101 }] });
+      } catch (cancelErr) {
+        // Abaikan jika belum ada yang di-cancel
       }
+
+      const todayTasks = (tasks || []).filter(t => t.date === todayStr);
+      const hasUncompleted = todayTasks.some(t => !t.completed);
+
+      let notifPayload;
+      if (hasUncompleted || todayTasks.length === 0) {
+        const motivasi = getRandomMotivasi();
+        notifPayload = {
+          title: motivasi.title,
+          body: motivasi.body,
+          id: 2100,
+          smallIcon: 'ic_launcher',
+          channelId: CHANNEL_ID,
+          sound: 'res_custom_notification',
+          schedule: { 
+            on: { hour: 21, minute: 0 },
+            allowWhileIdle: true // Tembus Doze Mode / Hemat Baterai Android
+          }
+        };
+      } else {
+        // Semua tugas hari ini tuntas
+        notifPayload = {
+          title: NOTIF_SELESAI.title,
+          body: NOTIF_SELESAI.body,
+          id: 2101,
+          smallIcon: 'ic_launcher',
+          channelId: CHANNEL_ID,
+          sound: 'res_custom_notification',
+          schedule: { 
+            on: { hour: 21, minute: 0 },
+            allowWhileIdle: true // Tembus Doze Mode / Hemat Baterai Android
+          }
+        };
+      }
+
+      await LocalNotifications.schedule({
+        notifications: [notifPayload]
+      });
     } catch (e) {
       console.error('Failed to schedule Android local notifications', e);
     }
   } else {
-    // 💻 Web Browser: Kirim langsung saat dipanggil
+    // 💻 Web Browser: Kirim langsung & mainkan suara kicau burung jika diakses saat pengujian
     if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
 
     const todayTasks = (tasks || []).filter(t => t.date === todayStr);
@@ -212,8 +208,10 @@ export const checkDailyReminders = async (tasks = []) => {
     try {
       if (hasUncompleted) {
         const motivasi = getRandomMotivasi();
+        playBirdChirp(2); // Suara Kicau Burung
         new Notification(motivasi.title, { body: motivasi.body });
       } else if (todayTasks.length > 0) {
+        playBirdChirp(2); // Suara Kicau Burung
         new Notification(NOTIF_SELESAI.title, { body: NOTIF_SELESAI.body });
       }
     } catch (e) {

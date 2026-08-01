@@ -3,6 +3,7 @@ import {
   Calendar, CheckCircle2, XCircle, BarChart3, TrendingUp, 
   ChevronLeft, ChevronRight, FileText, Sparkles 
 } from 'lucide-react';
+import { formatDateNumeric } from '../utils/dateUtils';
 
 export default function MonthlyRecap({ tasks = [] }) {
   const currentMonthStr = new Date().toISOString().slice(0, 7); // YYYY-MM
@@ -268,10 +269,11 @@ export default function MonthlyRecap({ tasks = [] }) {
           </div>
         ) : (
           <div className="space-y-1">
-            {monthTasks.map(task => (
+            {monthTasks.map((task, index) => (
               <div key={task.id} className="py-3 px-2 rounded-xl hover:bg-slate-50 transition-all flex items-center justify-between gap-3 text-xs sm:text-sm">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-500 shrink-0">{index + 1}.</span>
                     <span className={`font-semibold ${task.completed ? 'line-through text-slate-400' : 'text-slate-900'}`}>
                       {task.title}
                     </span>
@@ -281,7 +283,7 @@ export default function MonthlyRecap({ tasks = [] }) {
                       </span>
                     )}
                   </div>
-                  <span className="text-[11px] text-slate-400 block mt-0.5">Tanggal: {task.date}</span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5 pl-5">Tanggal: {formatDateNumeric(task.date)}</span>
                 </div>
 
                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 ${

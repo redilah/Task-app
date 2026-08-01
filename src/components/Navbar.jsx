@@ -1,12 +1,13 @@
 import React from 'react';
-import { Mountain, LayoutDashboard, Calendar, Bell, BellOff } from 'lucide-react';
+import { Mountain, LayoutDashboard, Calendar, Bell, BellOff, Plus } from 'lucide-react';
 import { playBirdChirp } from '../utils/audio';
 
 export default function Navbar({ 
   activeTab, 
   setActiveTab, 
   notifEnabled, 
-  onToggleNotification 
+  onToggleNotification,
+  onOpenAddTask
 }) {
   const handleNotifClick = () => {
     playBirdChirp(2); // Kicau Ganda terpilih untuk Notifikasi
@@ -74,6 +75,20 @@ export default function Navbar({
           </div>
         </div>
       </header>
+
+      {/* Floating Circle Plus Button for Mobile (Pojok Kanan Bawah di atas Rekap Bulanan, bentuk bulat, background #ffffff, plus abu-abu lembut text-slate-400, TANPA TEKS) */}
+      {onOpenAddTask && (
+        <div className="sm:hidden fixed bottom-20 right-4 z-50">
+          <button
+            onClick={onOpenAddTask}
+            className="w-12 h-12 bg-[#ffffff] hover:bg-slate-50 text-slate-400 hover:text-slate-600 rounded-full flex items-center justify-center shadow-lg border border-slate-200/80 active:scale-95 transition-all"
+            title="Tambah Tugas Baru"
+            aria-label="Tambah Tugas Baru"
+          >
+            <Plus className="w-6 h-6 stroke-[2.5]" />
+          </button>
+        </div>
+      )}
 
       {/* Mobile Bottom Navigation Bar (Ditaruh di Sebelah Kiri Dashboard Khusus Layar HP) */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg px-4 py-2 shadow-lg">

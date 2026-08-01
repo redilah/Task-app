@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { getTodayStr } from '../utils/dateUtils';
 
 export default function TaskModal({ isOpen, onClose, onSave, editingTask = null }) {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getTodayStr();
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
@@ -67,7 +68,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
             <input
               type="text"
               required
-              placeholder="Misal: Kerjakan Soal Bab 3 Halaman 45"
+              placeholder="Target kemenanganmu hari ini: Selesaikan tugas prioritas utama"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all shadow-xs"
@@ -82,7 +83,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
               </label>
               <input
                 type="text"
-                placeholder="Matematika, Web Dev, dll"
+                placeholder="Pencapaian, Belajar, Personal"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all shadow-xs"
