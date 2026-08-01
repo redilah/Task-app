@@ -1,6 +1,6 @@
 {
-  "versionCode": 6,
-  "versionName": "1.0.5",
+  "versionCode": 7,
+  "versionName": "1.0.6",
   "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk",
-  "releaseNotes": "Pembaruan versi 1.0.5 (Code 6): Logo Puncak melayang tanpa kotak background, Splash Screen 3 detik dengan animasi slide-down kontainer penuh, tata letak proporsional seluruh seri iPad/Tablet, serta Dashboard Pemantauan Admin Real-Time terpusat di Google Firebase."
+  "releaseNotes": "Pembaruan versi 1.0.6 (Code 7): Perbaikan otentikasi Firebase Telemetry real-time REST API dengan API Key & updateMask, Splash Screen 3s animasi full slide-down, tata letak iPad/Tablet, dan Dashboard Admin."
 }
