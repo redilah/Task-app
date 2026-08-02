@@ -96,7 +96,7 @@ export const requestNotificationPermission = async () => {
                 title: '🔔 Pengingat Puncak Aktif!',
                 body: 'Notifikasi pengingat & tugas harian telah berhasil diaktifkan dengan suara kicau burung.',
                 id: 1001,
-                smallIcon: 'ic_launcher',
+                smallIcon: 'ic_notification',
                 channelId: CHANNEL_ID,
                 sound: 'res_custom_notification',
                 schedule: { at: new Date(Date.now() + 800) }
@@ -165,7 +165,7 @@ export const checkDailyReminders = async (tasks = []) => {
                 title: '📝 Pengingat Puncak',
                 body: 'Eh kok kamu belum jadwalin tugas, tulis lah!',
                 id: EMPTY_NOTIF_ID,
-                smallIcon: 'ic_launcher',
+                smallIcon: 'ic_notification',
                 channelId: CHANNEL_ID,
                 sound: 'res_custom_notification',
                 schedule: { at: triggerTime, allowWhileIdle: true }
@@ -212,7 +212,7 @@ export const checkDailyReminders = async (tasks = []) => {
             title: '⏱️ Pengingat Tugas Puncak',
             body: `Tugas "${task.title}" belum kamu centang nih. Kerjakan sebentar yuk, cicil sekarang!`,
             id: 3000 + index,
-            smallIcon: 'ic_launcher',
+            smallIcon: 'ic_notification',
             channelId: CHANNEL_ID,
             sound: 'res_custom_notification',
             schedule: { at: trigger2h, allowWhileIdle: true }
@@ -238,7 +238,7 @@ export const checkDailyReminders = async (tasks = []) => {
           title: motivasi.title,
           body: motivasi.body,
           id: 1900,
-          smallIcon: 'ic_launcher',
+          smallIcon: 'ic_notification',
           channelId: CHANNEL_ID,
           sound: 'res_custom_notification',
           schedule: { 
@@ -251,7 +251,7 @@ export const checkDailyReminders = async (tasks = []) => {
           title: NOTIF_SELESAI.title,
           body: NOTIF_SELESAI.body,
           id: 1901,
-          smallIcon: 'ic_launcher',
+          smallIcon: 'ic_notification',
           channelId: CHANNEL_ID,
           sound: 'res_custom_notification',
           schedule: { 

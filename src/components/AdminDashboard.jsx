@@ -22,13 +22,19 @@ export default function AdminDashboard({ onBackToApp }) {
   const [countdown, setCountdown] = useState(3600); // 1 Jam = 3600 detik
 
   const loadData = async () => {
-    setLoading(true);
-    const data = await fetchAllUsersTelemetry();
-    setUsersData(data);
-    setLoading(false);
-    const now = new Date();
-    setLastRefreshed(now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB');
-    setCountdown(3600); // Reset ke 1 jam
+    try {
+      setLoading(true);
+      const data = await fetchAllUsersTelemetry();
+      setUsersData(Array.isArray(data) ? data : []);
+      const now = new Date();
+      setLastRefreshed(now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB');
+      setCountdown(3600); // Reset ke 1 jam
+    } catch (e) {
+      console.error('Failed to load admin data:', e);
+      setUsersData([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -56,16 +62,16 @@ export default function AdminDashboard({ onBackToApp }) {
   };
 
   // Kalkulasi statistik
-  const totalUsers = usersData.length;
+  const totalUsers = usersData ? usersData.length : 0;
   const currentVersionStr = `v${CURRENT_VERSION_NAME} (Code ${CURRENT_VERSION_CODE})`;
   
-  const updatedUsers = usersData.filter(u => u.appVersion === currentVersionStr).length;
+  const updatedUsers = (usersData || []).filter(u => u && u.appVersion === currentVersionStr).length;
   const outdatedUsers = totalUsers - updatedUsers;
 
-  const totalTasksSum = usersData.reduce((acc, u) => acc + (u.taskCount || 0), 0);
+  const totalTasksSum = (usersData || []).reduce((acc, u) => acc + (u && u.taskCount ? u.taskCount : 0), 0);
 
-  const dashboardCount = usersData.filter(u => u.activeTab === 'dashboard').length;
-  const recapCount = usersData.filter(u => u.activeTab === 'recap').length;
+  const dashboardCount = (usersData || []).filter(u => u && u.activeTab === 'dashboard').length;
+  const recapCount = (usersData || []).filter(u => u && u.activeTab === 'recap').length;
 
   const [platformFilter, setPlatformFilter] = useState('all'); // 'all', 'android', 'web'
 
@@ -77,10 +83,10 @@ export default function AdminDashboard({ onBackToApp }) {
   });
 
   // Urutkan MUTLAK beraturan berdasarkan Waktu Pertama Instalasi (Paling Pertama Instal = No 1)
-  const sortedUsersData = [...filteredUsersData].sort((a, b) => a.installDateMs - b.installDateMs);
+  const sortedUsersData = [...filteredUsersData].sort((a, b) => (a.installDateMs || 0) - (b.installDateMs || 0));
 
-  const androidPlatformCount = usersData.filter(u => u.platform === 'Android App').length;
-  const webPlatformCount = usersData.filter(u => u.platform === 'Web Browser').length;
+  const androidPlatformCount = usersData.filter(u => u && u.platform === 'Android App').length;
+  const webPlatformCount = usersData.filter(u => u && u.platform === 'Web Browser').length;
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans pb-16 selection:bg-slate-900 selection:text-white">

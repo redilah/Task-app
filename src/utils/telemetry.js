@@ -143,10 +143,19 @@ export const fetchAllUsersTelemetry = async () => {
       };
     });
 
-    // Urutkan secara beraturan berdasarkan Waktu Pertama Instalasi (Ascending: Yang pertama kali instal = No. 1)
-    parsedList.sort((a, b) => a.installDateMs - b.installDateMs);
+    // Abaikan khusus 2 data testing/percobaan lama sesuai permintaan
+    const EXCLUDED_DEVICE_IDS = [
+      'dev_admin_test',
+      'dev_mgx77kh9e_ms9shdy6', // No 1 pada gambar (Web Browser, 10.05 WIB)
+      'dev_x4b6d1dxs_ms9sw2aw'  // No 2 pada gambar (Android App, 10.17 WIB)
+    ];
 
-    return parsedList;
+    const filteredList = parsedList.filter(u => !EXCLUDED_DEVICE_IDS.includes(u.deviceId));
+
+    // Urutkan secara beraturan berdasarkan Waktu Pertama Instalasi (Ascending: Yang pertama kali instal = No. 1)
+    filteredList.sort((a, b) => a.installDateMs - b.installDateMs);
+
+    return filteredList;
   } catch (err) {
     console.error('Error fetching admin telemetry:', err);
     return [];
