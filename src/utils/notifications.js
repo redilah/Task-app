@@ -55,6 +55,7 @@ export const setNotificationState = (enabled) => {
 };
 
 // Buat notification channel untuk Android 8.0+ dengan Suara Kicau Burung Kustom (res_custom_notification)
+// PENTING: sound hanya boleh di channel, JANGAN di objek notifikasi individual — akan NPE di Android
 const createNotificationChannel = async () => {
   if (!isNative()) return;
   try {
@@ -64,12 +65,24 @@ const createNotificationChannel = async () => {
       description: 'Pengingat tugas harian Puncak dengan suara kicau burung',
       importance: 5, // High Importance (Suara + Pop-up Banner)
       visibility: 1,
-      sound: 'res_custom_notification',
+      sound: 'res_custom_notification', // Sound HANYA di channel
       vibration: true
     });
   } catch (e) {
     console.warn('Failed to create notification channel:', e);
   }
+};
+
+// Hitung waktu jam 19:00 WIB hari ini atau besok
+// Menggunakan `at` eksplisit, BUKAN `on` recurring yang bisa NPE di Android 12+
+const getNext19Schedule = () => {
+  const now = new Date();
+  const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 19, 0, 0, 0);
+  // Jika jam 19:00 hari ini sudah lewat, jadwalkan untuk besok
+  if (target.getTime() <= now.getTime()) {
+    target.setDate(target.getDate() + 1);
+  }
+  return target;
 };
 
 // Pilih pesan motivasi secara acak
@@ -88,7 +101,7 @@ export const requestNotificationPermission = async () => {
       if (status.display === 'granted') {
         setNotificationState(true);
 
-        // Konfirmasi aktivasi dengan ikon ic_launcher dan Suara Kicau Burung (res_custom_notification)
+        // Konfirmasi aktivasi — delay 3 detik agar sistem siap, TANPA `sound` di notif individual (sudah ada di channel)
         try {
           await LocalNotifications.schedule({
             notifications: [
@@ -98,8 +111,8 @@ export const requestNotificationPermission = async () => {
                 id: 1001,
                 smallIcon: 'ic_notification',
                 channelId: CHANNEL_ID,
-                sound: 'res_custom_notification',
-                schedule: { at: new Date(Date.now() + 800) }
+                // TIDAK ada `sound` di sini — sound dihandle oleh channel
+                schedule: { at: new Date(Date.now() + 3000) } // 3 detik, aman dari past-time NPE
               }
             ]
           });
@@ -167,7 +180,7 @@ export const checkDailyReminders = async (tasks = []) => {
                 id: EMPTY_NOTIF_ID,
                 smallIcon: 'ic_notification',
                 channelId: CHANNEL_ID,
-                sound: 'res_custom_notification',
+                // Tidak ada `sound` di sini — sudah dihandle channel
                 schedule: { at: triggerTime, allowWhileIdle: true }
               }
             ]
@@ -214,22 +227,30 @@ export const checkDailyReminders = async (tasks = []) => {
             id: 3000 + index,
             smallIcon: 'ic_notification',
             channelId: CHANNEL_ID,
-            sound: 'res_custom_notification',
+            // Tidak ada `sound` di sini — sudah dihandle channel
             schedule: { at: trigger2h, allowWhileIdle: true }
           });
         }
       });
 
       if (task2hNotifs.length > 0) {
-        await LocalNotifications.schedule({ notifications: task2hNotifs });
+        try {
+          await LocalNotifications.schedule({ notifications: task2hNotifs });
+        } catch (err) {
+          console.warn('Failed to schedule 2h task reminders:', err);
+        }
       }
 
       // -------------------------------------------------------------
       // 3. EVALUASI MALAM HARI JAM 19:00 WIB (7 Malam)
+      // Menggunakan `at` eksplisit (bukan `on` recurring) untuk menghindari NPE
+      // di Android 12+ akibat AlarmManager.setRepeating yang deprecated
       // -------------------------------------------------------------
       try {
         await LocalNotifications.cancel({ notifications: [{ id: 1900 }, { id: 1901 }] });
       } catch (err) {}
+
+      const nightScheduleTime = getNext19Schedule(); // Jam 19:00 hari ini atau besok
 
       let nightPayload;
       if (uncompletedTasks.length > 0 || todayTasks.length === 0) {
@@ -240,11 +261,8 @@ export const checkDailyReminders = async (tasks = []) => {
           id: 1900,
           smallIcon: 'ic_notification',
           channelId: CHANNEL_ID,
-          sound: 'res_custom_notification',
-          schedule: { 
-            on: { hour: 19, minute: 0 },
-            allowWhileIdle: true 
-          }
+          // Tidak ada `sound` di sini — sudah dihandle channel
+          schedule: { at: nightScheduleTime, allowWhileIdle: true }
         };
       } else {
         nightPayload = {
@@ -253,15 +271,16 @@ export const checkDailyReminders = async (tasks = []) => {
           id: 1901,
           smallIcon: 'ic_notification',
           channelId: CHANNEL_ID,
-          sound: 'res_custom_notification',
-          schedule: { 
-            on: { hour: 19, minute: 0 },
-            allowWhileIdle: true 
-          }
+          // Tidak ada `sound` di sini — sudah dihandle channel
+          schedule: { at: nightScheduleTime, allowWhileIdle: true }
         };
       }
 
-      await LocalNotifications.schedule({ notifications: [nightPayload] });
+      try {
+        await LocalNotifications.schedule({ notifications: [nightPayload] });
+      } catch (err) {
+        console.warn('Failed to schedule night reminder:', err);
+      }
 
     } catch (e) {
       console.error('Failed to schedule Android smart local notifications', e);

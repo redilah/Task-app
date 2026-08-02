@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import DailyDashboard from './components/DailyDashboard';
 import MonthlyRecap from './components/MonthlyRecap';
@@ -25,6 +25,8 @@ export default function App() {
   const [editingTask, setEditingTask] = useState(null);
   const [notifEnabled, setNotifEnabled] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
+  // Flag untuk mencegah race condition telemetri saat first render
+  const isInitialized = useRef(false);
 
   // In-App Update State
   const [updateInfo, setUpdateInfo] = useState(null);
@@ -64,10 +66,16 @@ export default function App() {
   }, []);
 
   // Kirim telemetri setiap kali jumlah tugas atau tab berubah
+  // PENTING: Gunakan isInitialized flag untuk mencegah race condition —
+  // pada first render, tasks masih [] (state awal) sebelum setTasks(loaded) selesai,
+  // sehingga bisa mengirim taskCount: 0 dan menimpa data yang benar dari effect pertama.
   useEffect(() => {
-    if (tasks.length >= 0) {
-      sendTelemetrySignal(tasks, activeTab);
+    if (!isInitialized.current) {
+      // Tandai bahwa first render sudah selesai — jangan kirim telemetri dengan data kosong
+      isInitialized.current = true;
+      return;
     }
+    sendTelemetrySignal(tasks, activeTab);
   }, [tasks, activeTab]);
 
   const handleToggleNotification = async () => {
@@ -77,7 +85,11 @@ export default function App() {
         setNotifEnabled(true);
         checkDailyReminders(tasks);
       } else {
-        alert('Izin notifikasi tidak diberikan oleh browser. Harap izinkan notifikasi pada pengaturan browser Anda.');
+        // Di Android Native JANGAN gunakan alert() — bisa crash di Capacitor WebView
+        // Capacitor sudah menampilkan dialog izin OS sendiri, tidak perlu pesan tambahan
+        if (!isNative()) {
+          alert('Izin notifikasi tidak diberikan. Harap izinkan notifikasi pada pengaturan browser Anda.');
+        }
       }
     } else {
       setNotificationState(false);
@@ -107,7 +119,16 @@ export default function App() {
   };
 
   const handleDeleteTask = (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus tugas ini?')) {
+    // window.confirm() bisa freeze di beberapa versi Capacitor Android
+    // Gunakan try-catch agar aman di semua platform
+    let confirmed = false;
+    try {
+      confirmed = window.confirm('Apakah Anda yakin ingin menghapus tugas ini?');
+    } catch (e) {
+      // Jika confirm tidak tersedia, langsung hapus (fallback untuk Android native)
+      confirmed = true;
+    }
+    if (confirmed) {
       const updated = tasks.filter(t => t.id !== id);
       updateTasks(updated);
     }

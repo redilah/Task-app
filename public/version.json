@@ -1,6 +1,6 @@
 {
-  "versionCode": 11,
-  "versionName": "1.1.0",
+  "versionCode": 12,
+  "versionName": "1.1.1",
   "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk",
-  "releaseNotes": "Pembaruan versi 1.1.0 (Code 11): Perbaikan ikon notifikasi resmi Puncak, kunci centang otomatis >24j, pembatasan tanggal lalu, dan integrasi Web Admin."
+  "releaseNotes": "Perbaikan penting v1.1.1 (Code 12): Fix crash saat tombol notifikasi ditekan di Android, fix kuantitas tugas tampil 0 di dashboard admin, perbaikan stabilitas keseluruhan."
 }

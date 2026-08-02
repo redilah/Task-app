@@ -2,6 +2,7 @@ import React from 'react';
 import { LayoutDashboard, Calendar, Bell, BellOff, Plus } from 'lucide-react';
 import PuncakLogo from './PuncakLogo';
 import { playBirdChirp } from '../utils/audio';
+import { isNative } from '../utils/notifications';
 
 export default function Navbar({ 
   activeTab, 
@@ -11,7 +12,10 @@ export default function Navbar({
   onOpenAddTask
 }) {
   const handleNotifClick = () => {
-    playBirdChirp(2); // Kicau Ganda terpilih untuk Notifikasi
+    // Hanya mainkan suara di Web Browser — di Android Native sudah ada suara dari notification channel
+    if (!isNative()) {
+      playBirdChirp(2);
+    }
     onToggleNotification();
   };
 

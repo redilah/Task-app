@@ -70,19 +70,36 @@ export const sendTelemetrySignal = async (tasks = [], activeTab = 'dashboard') =
 
     const versionStr = `v${CURRENT_VERSION_NAME} (Code ${CURRENT_VERSION_CODE})`;
     const platformStr = isNative() ? 'Android App' : 'Web Browser';
-    const taskCount = tasks ? tasks.length : 0;
+
+    // Guard: jika tasks array kosong (bisa jadi race condition / state belum ready),
+    // ambil langsung dari localStorage sebagai fallback agar tidak kirim 0 yang salah
+    let safeTaskCount = Array.isArray(tasks) ? tasks.length : 0;
+    if (safeTaskCount === 0) {
+      try {
+        const stored = localStorage.getItem('taskly_tasks_v1');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            safeTaskCount = parsed.length;
+          }
+        }
+      } catch (e) {
+        // Abaikan error parsing localStorage — gunakan 0
+      }
+    }
 
     const payload = {
       fields: {
         deviceId: { stringValue: deviceId },
         installDate: { stringValue: installDate },
-        installDateMs: { integerValue: installDateMs },
+        // Firestore REST API: integerValue harus berupa string (int64 format)
+        installDateMs: { integerValue: String(installDateMs) },
         lastSeenDate: { stringValue: lastSeenDate },
         appVersion: { stringValue: versionStr },
-        taskCount: { integerValue: taskCount },
+        taskCount: { integerValue: String(safeTaskCount) },
         activeTab: { stringValue: activeTab },
         platform: { stringValue: platformStr },
-        updatedAtMs: { integerValue: Date.now() }
+        updatedAtMs: { integerValue: String(Date.now()) }
       }
     };
 
