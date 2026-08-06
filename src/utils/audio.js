@@ -16,10 +16,14 @@ const getAudioContext = () => {
 };
 
 // Play synthesized realistic bird chirp sound effect
-export const playBirdChirp = (chirpType = 1) => {
+export const playBirdChirp = async (chirpType = 1) => {
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
+
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
 
     const now = ctx.currentTime;
 

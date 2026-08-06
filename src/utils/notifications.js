@@ -4,7 +4,7 @@ import { getTodayStr } from './dateUtils';
 import { playBirdChirp } from './audio';
 
 const NOTIF_KEY = 'puncak_notifications_enabled';
-const CHANNEL_ID = 'puncak_notifications_channel_v2';
+const CHANNEL_ID = 'puncak_notifications_channel_v3';
 const EMPTY_NOTIF_ID = 1010;
 
 // Daftar pesan motivasi pedas untuk tugas belum selesai jam 19:00 (7 Malam)
@@ -55,17 +55,21 @@ export const setNotificationState = (enabled) => {
 };
 
 // Buat notification channel untuk Android 8.0+ dengan Suara Kicau Burung Kustom (res_custom_notification)
-// PENTING: sound hanya boleh di channel, JANGAN di objek notifikasi individual — akan NPE di Android
 const createNotificationChannel = async () => {
   if (!isNative()) return;
   try {
+    // Hapus channel lama agar ter-reset bersih
+    try {
+      await LocalNotifications.deleteChannel({ id: 'puncak_notifications_channel_v2' });
+    } catch (err) {}
+
     await LocalNotifications.createChannel({
       id: CHANNEL_ID,
-      name: 'Pengingat Puncak',
+      name: 'Pengingat Puncak V3',
       description: 'Pengingat tugas harian Puncak dengan suara kicau burung',
       importance: 5, // High Importance (Suara + Pop-up Banner)
       visibility: 1,
-      sound: 'res_custom_notification', // Sound HANYA di channel
+      sound: 'res_custom_notification.mp3',
       vibration: true
     });
   } catch (e) {

@@ -9,7 +9,7 @@ service cloud.firestore {
       // Mengizinkan aplikasi Puncak mengirim/meng-update data telemetri
       // Hanya bidang (fields) resmi yang diperbolehkan
       allow create, update: if request.resource.data.keys().hasOnly([
-        'deviceId', 'installDate', 'lastSeenDate', 'appVersion',
+        'deviceId', 'installDate', 'installDateMs', 'lastSeenDate', 'appVersion',
         'taskCount', 'activeTab', 'platform', 'updatedAtMs'
       ]);
       

@@ -51,16 +51,16 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-apple-pop">
         {/* Modal Header */}
         <div className="px-5 py-4 flex items-center justify-between">
-          <h3 className="text-base font-bold text-slate-900">
+          <h3 className="text-base font-bold text-slate-900 tracking-tight">
             {editingTask ? 'Edit Tugas' : 'Tambah Tugas Baru'}
           </h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 active:scale-95 transition-all"
           >
             <X className="w-5 h-5" />
           </button>
@@ -120,7 +120,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
               <button
                 type="button"
                 onClick={() => setPriority('high')}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+                className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 active:scale-95 transition-all ${
                   priority === 'high'
                     ? 'bg-rose-50 text-rose-700 ring-2 ring-rose-200 shadow-xs'
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
@@ -132,7 +132,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
               <button
                 type="button"
                 onClick={() => setPriority('medium')}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+                className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 active:scale-95 transition-all ${
                   priority === 'medium'
                     ? 'bg-amber-50 text-amber-700 ring-2 ring-amber-200 shadow-xs'
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
@@ -144,7 +144,7 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
               <button
                 type="button"
                 onClick={() => setPriority('low')}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 transition-all ${
+                className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 active:scale-95 transition-all ${
                   priority === 'low'
                     ? 'bg-emerald-50 text-emerald-700 ring-2 ring-emerald-200 shadow-xs'
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
@@ -159,13 +159,13 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-xl transition-all"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 active:scale-[0.97] text-slate-700 text-xs font-medium rounded-xl transition-all"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition-all shadow-xs"
+              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 active:scale-[0.97] text-white text-xs font-semibold rounded-xl transition-all shadow-xs"
             >
               {editingTask ? 'Simpan Perubahan' : 'Tambah Tugas'}
             </button>

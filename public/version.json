@@ -1,6 +1,6 @@
 {
-  "versionCode": 12,
-  "versionName": "1.1.1",
+  "versionCode": 13,
+  "versionName": "1.1.2",
   "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk",
-  "releaseNotes": "Perbaikan penting v1.1.1 (Code 12): Fix crash saat tombol notifikasi ditekan di Android, fix kuantitas tugas tampil 0 di dashboard admin, perbaikan stabilitas keseluruhan."
+  "releaseNotes": "Fix Firestore telemetry error 403 — update security rules agar field installDateMs diizinkan untuk ditulis."
 }

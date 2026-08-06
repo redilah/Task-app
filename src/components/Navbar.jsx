@@ -22,7 +22,7 @@ export default function Navbar({
   return (
     <>
       {/* Desktop & Tablet Header */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md shadow-sm">
+      <header className="sticky top-0 z-40 bg-white/70 backdrop-blur-xl saturate-150 border-b border-slate-200/50 shadow-sm transition-all">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div 
             onClick={() => setActiveTab('dashboard')}
@@ -40,7 +40,7 @@ export default function Navbar({
             <nav className="flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl shadow-xs">
               <button
                 onClick={() => setActiveTab('dashboard')}
-                className={`flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg active:scale-95 transition-all ${
                   activeTab === 'dashboard'
                     ? 'bg-white text-slate-900 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
@@ -52,7 +52,7 @@ export default function Navbar({
 
               <button
                 onClick={() => setActiveTab('recap')}
-                className={`flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg active:scale-95 transition-all ${
                   activeTab === 'recap'
                     ? 'bg-white text-slate-900 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
@@ -66,7 +66,7 @@ export default function Navbar({
             {/* Notification Toggle Button Desktop (Dengan Suara Kicau Ganda) */}
             <button
               onClick={handleNotifClick}
-              className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold ${
+              className={`p-2.5 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold ${
                 notifEnabled
                   ? 'bg-emerald-50 text-emerald-700 shadow-xs'
                   : 'bg-white text-slate-500 hover:text-slate-800 shadow-xs'
@@ -95,12 +95,12 @@ export default function Navbar({
       )}
 
       {/* Mobile & iPad / Tablet Bottom Navigation Bar (Bawah Layar HP & iPad Seri Apapun: 2xl:hidden) */}
-      <nav className="2xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg px-4 py-2.5 shadow-lg border-t border-slate-200/60">
+      <nav className="2xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/70 backdrop-blur-xl saturate-150 px-4 py-2.5 shadow-lg border-t border-slate-200/50 transition-all">
         <div className="max-w-md mx-auto grid grid-cols-3 items-center text-center">
           {/* 1. Tombol Notifikasi Pengingat */}
           <button
             onClick={handleNotifClick}
-            className={`flex flex-col items-center gap-1 py-1 rounded-xl transition-all ${
+            className={`flex flex-col items-center gap-1 py-1 rounded-xl active:scale-95 transition-all ${
               notifEnabled ? 'text-emerald-600 font-bold' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -115,7 +115,7 @@ export default function Navbar({
           {/* 2. Dashboard Harian */}
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`flex flex-col items-center gap-1 py-1 rounded-xl transition-all ${
+            className={`flex flex-col items-center gap-1 py-1 rounded-xl active:scale-95 transition-all ${
               activeTab === 'dashboard' ? 'text-slate-900 font-bold' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -126,7 +126,7 @@ export default function Navbar({
           {/* 3. Rekap Bulanan */}
           <button
             onClick={() => setActiveTab('recap')}
-            className={`flex flex-col items-center gap-1 py-1 rounded-xl transition-all ${
+            className={`flex flex-col items-center gap-1 py-1 rounded-xl active:scale-95 transition-all ${
               activeTab === 'recap' ? 'text-slate-900 font-bold' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
