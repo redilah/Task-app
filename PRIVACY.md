@@ -78,7 +78,6 @@ We may update this Privacy Policy from time to time. Any changes will be reflect
 
 If you have any questions, concerns, or requests regarding this Privacy Policy or the App's data practices, you can reach us through:
 
-- **Email:** [redilahh@gmail.com](mailto:redilahh@gmail.com)
-- **GitHub Issues:** [github.com/redilah/Task-app/issues](https://github.com/redilah/Task-app/issues)
+- **Email:** [stevanusredi199@gmail.com](mailto:stevanusredi199@gmail.com)
 
 We will do our best to respond within a reasonable timeframe.
