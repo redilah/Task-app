@@ -95,8 +95,10 @@ export default function Navbar({
       )}
 
       {/* Mobile & iPad / Tablet Bottom Navigation Bar (Bawah Layar HP & iPad Seri Apapun: 2xl:hidden) */}
-      <nav className="2xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/70 backdrop-blur-xl saturate-150 px-4 py-2.5 shadow-lg border-t border-slate-200/50 transition-all">
-        <div className="max-w-md mx-auto grid grid-cols-3 items-center text-center">
+      <nav className="2xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-[url('/app-bg.jpg')] bg-cover bg-bottom px-4 py-2.5 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] border-t border-white/20 transition-all">
+        {/* Overlay agar text/icon tetap terbaca */}
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-sm z-[-1]"></div>
+        <div className="max-w-md mx-auto grid grid-cols-3 items-center text-center relative z-10">
           {/* 1. Tombol Notifikasi Pengingat */}
           <button
             onClick={handleNotifClick}

@@ -3,3 +3,8 @@ dist
 .netlify
 .DS_Store
 *.log
+
+*.keystore
+keystore-info.txt
+
+*.apk

@@ -171,7 +171,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f0f4f8] font-sans text-slate-900 selection:bg-slate-900 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[url('/app-bg.jpg')] bg-cover bg-center bg-fixed font-sans text-slate-900 selection:bg-slate-900 selection:text-white">
       {/* Header Navbar Puncak (Dengan Toggle Notifikasi) */}
       <Navbar 
         activeTab={activeTab} 
