@@ -1,6 +1,6 @@
 {
-  "versionCode": 20,
-  "versionName": "1.1.3",
+  "versionCode": 21,
+  "versionName": "1.1.4",
   "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk",
-  "releaseNotes": "Perbaikan suara notifikasi kicau burung V3 & penyempurnaan UI Apple Design."
+  "releaseNotes": "Tampilan baru: background terang (#f0f4f8) menggantikan dark background."
 }
