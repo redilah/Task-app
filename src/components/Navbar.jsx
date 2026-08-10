@@ -95,7 +95,7 @@ export default function Navbar({
       )}
 
       {/* Mobile & iPad / Tablet Bottom Navigation Bar (Bawah Layar HP & iPad Seri Apapun: 2xl:hidden) */}
-      <nav className="2xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0F172A] px-4 py-2.5 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] border-t border-white/20 transition-all">
+      <nav className="2xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#f0f4f8] px-4 py-2.5 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.06)] border-t border-slate-200 transition-all">
         {/* Overlay tidak diperlukan lagi karena background sudah solid */}
         <div className="max-w-md mx-auto grid grid-cols-3 items-center text-center relative z-10">
           {/* 1. Tombol Notifikasi Pengingat */}
@@ -117,7 +117,7 @@ export default function Navbar({
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`flex flex-col items-center gap-1 py-1 rounded-xl active:scale-95 transition-all ${
-              activeTab === 'dashboard' ? 'text-slate-900 font-bold' : 'text-slate-400 hover:text-slate-600'
+              activeTab === 'dashboard' ? 'text-slate-800 font-bold' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
             <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -128,7 +128,7 @@ export default function Navbar({
           <button
             onClick={() => setActiveTab('recap')}
             className={`flex flex-col items-center gap-1 py-1 rounded-xl active:scale-95 transition-all ${
-              activeTab === 'recap' ? 'text-slate-900 font-bold' : 'text-slate-400 hover:text-slate-600'
+              activeTab === 'recap' ? 'text-slate-800 font-bold' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
             <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
