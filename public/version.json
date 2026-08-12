@@ -1,6 +1,6 @@
 {
-  "versionCode": 21,
-  "versionName": "1.1.4",
+  "versionCode": 23,
+  "versionName": "1.1.6",
   "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk",
   "releaseNotes": "Tampilan baru: background terang (#f0f4f8) menggantikan dark background."
 }
