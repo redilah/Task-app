@@ -1,5 +1,5 @@
-export const CURRENT_VERSION_CODE = 24;
-export const CURRENT_VERSION_NAME = '1.1.7';
+export const CURRENT_VERSION_CODE = 25;
+export const CURRENT_VERSION_NAME = '1.1.8';
 
 export const checkForAppUpdates = async () => {
   try {
