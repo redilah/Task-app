@@ -1,5 +1,5 @@
-export const CURRENT_VERSION_CODE = 23;
-export const CURRENT_VERSION_NAME = '1.1.6';
+export const CURRENT_VERSION_CODE = 24;
+export const CURRENT_VERSION_NAME = '1.1.7';
 
 export const checkForAppUpdates = async () => {
   try {
@@ -8,7 +8,10 @@ export const checkForAppUpdates = async () => {
       ? `/version.json?t=${Date.now()}`
       : `https://raw.githubusercontent.com/redilah/Task-app/main/public/version.json?t=${Date.now()}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      method: 'GET',
+      cache: 'no-store'
+    });
     if (!response.ok) return { hasUpdate: false };
 
     const data = await response.json();
@@ -17,13 +20,15 @@ export const checkForAppUpdates = async () => {
 
     // Pengecekan berbasis versionCode (Integer comparison) sesuai standar sideload Android
     if (latestVersionCode > CURRENT_VERSION_CODE) {
+      const rawApkUrl = data.apkUrl || 'https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk';
+      const cleanApkUrl = rawApkUrl.split('?')[0] + `?t=${Date.now()}`;
       return {
         hasUpdate: true,
         currentVersionCode: CURRENT_VERSION_CODE,
         currentVersionName: CURRENT_VERSION_NAME,
         latestVersionCode: latestVersionCode,
         latestVersionName: latestVersionName,
-        apkUrl: data.apkUrl || 'https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk',
+        apkUrl: cleanApkUrl,
         releaseNotes: data.releaseNotes || 'Pembaruan versi terbaru dengan peningkatan stabilitas dan fitur baru.'
       };
     }

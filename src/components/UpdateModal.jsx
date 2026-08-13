@@ -5,8 +5,9 @@ export default function UpdateModal({ isOpen, onClose, updateInfo }) {
   if (!isOpen || !updateInfo) return null;
 
   const handleDownloadUpdate = () => {
-    const url = updateInfo.apkUrl || 'https://puncak-tasks.netlify.app/Puncak.apk';
-    window.open(url, '_blank');
+    const rawUrl = updateInfo?.apkUrl || 'https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk';
+    const cleanUrl = rawUrl.split('?')[0] + `?t=${Date.now()}`;
+    window.open(cleanUrl, '_system') || (window.location.href = cleanUrl);
   };
 
   return (

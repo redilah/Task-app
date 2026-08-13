@@ -37,3 +37,18 @@ Setiap selesai me-render/kompilasi APK baru (`gradlew assembleDebug`), file APK 
 - Akibatnya, APK **memuat dirinya sendiri** (recursive bundling) → ukuran membengkak dari ~4 MB menjadi ~20 MB.
 
 Mekanisme in-app update menggunakan URL remote (GitHub Raw / Netlify), **bukan** file lokal di dalam bundle. Jadi `Puncak.apk` di `public/` tidak diperlukan.
+
+## Larangan Membuat Aset Baru Tanpa Verifikasi (WAJIB)
+
+**DILARANG** membuat file ikon, logo, atau aset visual baru untuk keperluan store (APKPure, Play Store, dll) tanpa terlebih dahulu memeriksa apakah file asli sudah ada di proyek. Langkah wajib:
+1. Cari file ikon/aset yang sudah ada di seluruh proyek (`src/`, `resources/`, `android/app/src/main/res/`).
+2. Jika sudah ada → **SALIN dan RESIZE** file yang ada, **JANGAN buat dari scratch**.
+3. Hanya buat aset baru jika file sumber benar-benar tidak ditemukan sama sekali.
+
+Alasan: standar industri menetapkan 1 aplikasi = 1 logo yang konsisten di semua platform. Membuat logo baru menyebabkan inkonsistensi visual antara ikon di HP dan ikon di store.
+
+## Verifikasi Nama File Sebelum Menyebut Path/URL (WAJIB)
+
+Sebelum menyebut path file, URL raw GitHub, atau nama file dalam instruksi kepada user, **WAJIB** verifikasi nama file yang sebenarnya dengan `list_dir` atau `grep_search` terlebih dahulu.
+
+**DILARANG** menebak nama file berdasarkan konvensi umum (misal: `PRIVACY_POLICY.md`, `README.md`, dll) tanpa mengecek keberadaannya di filesystem proyek. Contoh kasus: file privasi proyek ini bernama `PRIVACY.md`, **bukan** `PRIVACY_POLICY.md`.

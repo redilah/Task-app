@@ -1,6 +1,6 @@
 {
-  "versionCode": 23,
-  "versionName": "1.1.6",
-  "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk",
-  "releaseNotes": "Tampilan baru: background terang (#f0f4f8) menggantikan dark background."
+  "versionCode": 24,
+  "versionName": "1.1.7",
+  "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk?v=1.1.7",
+  "releaseNotes": "New in this update:\n- [New] Perbaikan cache update in-app agar tidak berulang\n- [New] Peningkatan responsivitas aplikasi"
 }
