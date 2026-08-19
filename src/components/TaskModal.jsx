@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, CheckCircle2, AlertCircle } from 'lucide-react';
-import { getTodayStr, isPastDate } from '../utils/dateUtils';
+import { X, CheckCircle2, AlertCircle, CalendarDays } from 'lucide-react';
+import { getTodayStr, isPastDate, getFutureDates } from '../utils/dateUtils';
 
 export default function TaskModal({ isOpen, onClose, onSave, editingTask = null }) {
   const todayStr = getTodayStr();
@@ -49,6 +49,33 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
 
     onClose();
   };
+
+  const handleApplyAllDay = (e) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+
+    if (isPastDate(date)) {
+      alert('Tidak dapat menambahkan tugas untuk hari/bulan yang sudah lewat');
+      return;
+    }
+
+    const futureDates = getFutureDates(date, 30);
+    const nowTs = Date.now();
+    const tasksToSave = futureDates.map((d, index) => ({
+      id: `t-${nowTs}-${index}`,
+      title: title.trim(),
+      category: category.trim(),
+      priority,
+      date: d,
+      completed: false,
+      createdMonth: d.slice(0, 7),
+      createdAt: nowTs + index
+    }));
+
+    onSave(tasksToSave);
+    onClose();
+  };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300">
@@ -155,11 +182,20 @@ export default function TaskModal({ isOpen, onClose, onSave, editingTask = null 
             </div>
           </div>
 
-          <div className="pt-3 flex items-center justify-end gap-2">
+          <div className="pt-3 flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={handleApplyAllDay}
+              className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 active:scale-[0.97] text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-all"
+              title="Otomatis terapkan tugas ini setiap hari untuk 30 hari ke depan"
+            >
+              <CalendarDays className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Apply All Day</span>
+            </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 active:scale-[0.97] text-slate-700 text-xs font-medium rounded-xl transition-all"
+              className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 active:scale-[0.97] text-slate-700 text-xs font-medium rounded-xl transition-all"
             >
               Batal
             </button>

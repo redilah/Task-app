@@ -8,6 +8,7 @@ export default function UpdateModal({ isOpen, onClose, updateInfo }) {
     const rawUrl = updateInfo?.apkUrl || 'https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk';
     const cleanUrl = rawUrl.split('?')[0] + `?t=${Date.now()}`;
     window.open(cleanUrl, '_system') || (window.location.href = cleanUrl);
+    if (onClose) onClose();
   };
 
   return (

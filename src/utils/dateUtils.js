@@ -56,3 +56,26 @@ export function isPastDate(dateStr) {
   return dateStr < today;
 }
 
+/**
+ * Menghasilkan daftar string tanggal ("YYYY-MM-DD") untuk rentang hari ke depan
+ * Mulai dari startDateStr sampai N hari ke depan (default: 30 hari)
+ */
+export function getFutureDates(startDateStr, days = 30) {
+  if (!startDateStr) return [];
+  const parts = startDateStr.split('-').map(Number);
+  if (parts.length !== 3) return [startDateStr];
+
+  const [year, month, day] = parts;
+  const dates = [];
+
+  for (let i = 0; i < days; i++) {
+    const d = new Date(year, month - 1, day + i);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dt = String(d.getDate()).padStart(2, '0');
+    dates.push(`${y}-${m}-${dt}`);
+  }
+  return dates;
+}
+
+

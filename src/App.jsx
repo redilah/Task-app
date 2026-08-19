@@ -59,6 +59,10 @@ export default function App() {
     // Check for In-App APK Updates automatically in background
     checkForAppUpdates().then((res) => {
       if (res.hasUpdate) {
+        const dismissedCode = localStorage.getItem('puncak_dismissed_version_code');
+        if (dismissedCode && parseInt(dismissedCode, 10) >= res.latestVersionCode) {
+          return;
+        }
         setUpdateInfo(res);
         setIsUpdateModalOpen(true);
       }
@@ -135,6 +139,13 @@ export default function App() {
   };
 
   const handleSaveTask = (taskData) => {
+    if (Array.isArray(taskData)) {
+      const newIds = new Set(taskData.map(t => t.id));
+      const filtered = tasks.filter(t => !newIds.has(t.id));
+      const updated = [...taskData, ...filtered];
+      updateTasks(updated);
+      return;
+    }
     const exists = tasks.some(t => t.id === taskData.id);
     let updated;
     if (exists) {
@@ -143,6 +154,13 @@ export default function App() {
       updated = [taskData, ...tasks];
     }
     updateTasks(updated);
+  };
+
+  const handleCloseUpdateModal = () => {
+    if (updateInfo?.latestVersionCode) {
+      localStorage.setItem('puncak_dismissed_version_code', String(updateInfo.latestVersionCode));
+    }
+    setIsUpdateModalOpen(false);
   };
 
   const handleOpenAddTask = (targetDate) => {
@@ -211,7 +229,7 @@ export default function App() {
       {/* In-App Auto Update Modal Dialog (Cara B) */}
       <UpdateModal
         isOpen={isUpdateModalOpen}
-        onClose={() => setIsUpdateModalOpen(false)}
+        onClose={handleCloseUpdateModal}
         updateInfo={updateInfo}
       />
 
