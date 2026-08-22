@@ -52,3 +52,13 @@ Alasan: standar industri menetapkan 1 aplikasi = 1 logo yang konsisten di semua 
 Sebelum menyebut path file, URL raw GitHub, atau nama file dalam instruksi kepada user, **WAJIB** verifikasi nama file yang sebenarnya dengan `list_dir` atau `grep_search` terlebih dahulu.
 
 **DILARANG** menebak nama file berdasarkan konvensi umum (misal: `PRIVACY_POLICY.md`, `README.md`, dll) tanpa mengecek keberadaannya di filesystem proyek. Contoh kasus: file privasi proyek ini bernama `PRIVACY.md`, **bukan** `PRIVACY_POLICY.md`.
+
+## Pola Custom Wheel Picker & Inertial Scrolling (WAJIB)
+
+- Gunakan fisika inersia/momentum dengan peluruhan gesekan (friction ~0.93) dan magnetic spring snap ke indeks terdekat.
+- Render jendela tampak secara dinamis (`baseIndex = Math.round(-offsetY / ITEM_HEIGHT)`) agar elemen tidak hilang saat digulir cepat.
+- Tampilkan tepat 3 baris tanpa ruang kosong: baris tengah (aktif) dengan warna aksen kontras dan sedikit naik (`-translate-y-0.5`), baris atas/bawah redup.
+
+## Ketentuan Debug Sideload Keystore (WAJIB)
+
+- Untuk pengujian langsung di HP pengguna, selalu gunakan build standar `gradlew assembleDebug` kecuali user secara eksplisit meminta release signature. Hal ini mencegah error Android `Package conflict with existing package`.

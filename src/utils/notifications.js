@@ -200,48 +200,67 @@ export const checkDailyReminders = async (tasks = []) => {
       }
 
       // -------------------------------------------------------------
-      // 2. CHIP NOTIFIKASI TUGAS TERTUNDA 2 JAM
+      // 2. NOTIFIKASI TEPAT WAKTU (SCHEDULED TIME ALARM)
       // -------------------------------------------------------------
-      const todayTasks = (tasks || []).filter(t => t.date === todayStr);
-      const uncompletedTasks = todayTasks.filter(t => !t.completed);
+      const uncompletedTasks = (tasks || []).filter(t => !t.completed);
 
-      // Batalkan notifikasi 2 jam lama (range ID 3000 - 3099)
+      // Batalkan notifikasi lama (range ID 3000 - 3099 & 4000 - 4099)
       const cancelNotifs = [];
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 60; i++) {
         cancelNotifs.push({ id: 3000 + i });
+        cancelNotifs.push({ id: 4000 + i });
       }
       try {
         await LocalNotifications.cancel({ notifications: cancelNotifs });
       } catch (err) {}
 
-      // Jadwalkan notifikasi 2 jam untuk tugas yang belum selesai
       const nowMs = Date.now();
-      const task2hNotifs = [];
+      const scheduledTimedNotifs = [];
 
-      uncompletedTasks.slice(0, 10).forEach((task, index) => {
-        // Ambil timestamp pembuatan tugas (atau default saat ini)
+      // 2a. Notifikasi tepat pada Jam yang ditentukan pengguna di pop-up (Alarm Kalender)
+      uncompletedTasks.filter(t => t.time && t.date).slice(0, 30).forEach((task, index) => {
+        try {
+          const [y, m, d] = task.date.split('-').map(Number);
+          const [h, min] = task.time.split(':').map(Number);
+          const taskDateObj = new Date(y, m - 1, d, h, min, 0, 0);
+
+          if (taskDateObj.getTime() > nowMs) {
+            scheduledTimedNotifs.push({
+              title: `⏰ Pengingat Tugas: ${task.title}`,
+              body: 'Yuk selesaikan sekarang!',
+              id: 4000 + index,
+              smallIcon: 'ic_notification',
+              channelId: CHANNEL_ID,
+              schedule: { at: taskDateObj, allowWhileIdle: true }
+            });
+          }
+        } catch (e) {
+          console.warn('Error parsing task scheduled time:', e);
+        }
+      });
+
+      // 2b. Notifikasi cadangan 2 jam jika tugas belum memiliki jam khusus
+      uncompletedTasks.filter(t => !t.time && t.date === todayStr).slice(0, 10).forEach((task, index) => {
         const taskTime = task.id ? parseInt(task.id.replace('t-', '')) || nowMs : nowMs;
         const trigger2h = new Date(taskTime + 2 * 60 * 60 * 1000); // H+2 Jam
 
-        // Hanya jadwalkan jika waktu H+2 jam masih di masa depan
         if (trigger2h.getTime() > nowMs) {
-          task2hNotifs.push({
+          scheduledTimedNotifs.push({
             title: '⏱️ Pengingat Tugas Puncak',
-            body: `Tugas "${task.title}" belum kamu centang nih. Kerjakan sebentar yuk, cicil sekarang!`,
+            body: `Tugas "${task.title}" belum kamu centang nih. Kerjakan sebentar yuk!`,
             id: 3000 + index,
             smallIcon: 'ic_notification',
             channelId: CHANNEL_ID,
-            // Tidak ada `sound` di sini — sudah dihandle channel
             schedule: { at: trigger2h, allowWhileIdle: true }
           });
         }
       });
 
-      if (task2hNotifs.length > 0) {
+      if (scheduledTimedNotifs.length > 0) {
         try {
-          await LocalNotifications.schedule({ notifications: task2hNotifs });
+          await LocalNotifications.schedule({ notifications: scheduledTimedNotifs });
         } catch (err) {
-          console.warn('Failed to schedule 2h task reminders:', err);
+          console.warn('Failed to schedule timed task reminders:', err);
         }
       }
 
@@ -257,7 +276,9 @@ export const checkDailyReminders = async (tasks = []) => {
       const nightScheduleTime = getNext19Schedule(); // Jam 19:00 hari ini atau besok
 
       let nightPayload;
-      if (uncompletedTasks.length > 0 || todayTasks.length === 0) {
+      const todayTasks = (tasks || []).filter(t => t.date === todayStr);
+      const todayUncompleted = todayTasks.filter(t => !t.completed);
+      if (todayUncompleted.length > 0 || todayTasks.length === 0) {
         const motivasi = getRandomMotivasi();
         nightPayload = {
           title: motivasi.title,
@@ -265,7 +286,6 @@ export const checkDailyReminders = async (tasks = []) => {
           id: 1900,
           smallIcon: 'ic_notification',
           channelId: CHANNEL_ID,
-          // Tidak ada `sound` di sini — sudah dihandle channel
           schedule: { at: nightScheduleTime, allowWhileIdle: true }
         };
       } else {
@@ -275,7 +295,6 @@ export const checkDailyReminders = async (tasks = []) => {
           id: 1901,
           smallIcon: 'ic_notification',
           channelId: CHANNEL_ID,
-          // Tidak ada `sound` di sini — sudah dihandle channel
           schedule: { at: nightScheduleTime, allowWhileIdle: true }
         };
       }
@@ -290,25 +309,30 @@ export const checkDailyReminders = async (tasks = []) => {
       console.error('Failed to schedule Android smart local notifications', e);
     }
   } else {
-    // 💻 WEB BROWSER FALLBACK — Kirim notifikasi web & suara kicau burung
+    // 💻 WEB BROWSER FALLBACK — Jadwalkan notifikasi timer & suara kicau burung
     if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
 
-    const todayTasks = (tasks || []).filter(t => t.date === todayStr);
-    const uncompletedTasks = todayTasks.filter(t => !t.completed);
+    const nowMs = Date.now();
+    const uncompletedTasks = (tasks || []).filter(t => !t.completed);
 
-    try {
-      if (tasks.length === 0) {
-        playBirdChirp(2); // Suara Kicau Burung
-        new Notification('📝 Pengingat Puncak', {
-          body: 'Eh kok kamu belum jadwalin tugas, tulis lah!'
-        });
-      } else if (uncompletedTasks.length > 0) {
-        const motivasi = getRandomMotivasi();
-        playBirdChirp(2); // Suara Kicau Burung
-        new Notification(motivasi.title, { body: motivasi.body });
-      }
-    } catch (e) {
-      console.error('Error creating browser notification:', e);
-    }
+    // Jadwalkan alarm browser untuk tugas yang memiliki jam
+    uncompletedTasks.filter(t => t.time && t.date).forEach(task => {
+      try {
+        const [y, m, d] = task.date.split('-').map(Number);
+        const [h, min] = task.time.split(':').map(Number);
+        const targetMs = new Date(y, m - 1, d, h, min, 0, 0).getTime();
+        const diffMs = targetMs - nowMs;
+
+        if (diffMs > 0 && diffMs < 24 * 60 * 60 * 1000) {
+          setTimeout(() => {
+            playBirdChirp(2);
+            new Notification(`⏰ Pengingat Tugas: ${task.title}`, {
+              body: 'Yuk selesaikan sekarang!'
+            });
+          }, diffMs);
+        }
+      } catch (e) {}
+    });
   }
 };
+

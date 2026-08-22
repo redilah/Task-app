@@ -1,6 +1,9 @@
 {
-  "versionCode": 26,
-  "versionName": "1.1.9",
-  "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk?v=1.1.9",
-  "releaseNotes": "New in this update:\n- [New] Fitur Apply All Day untuk tugas harian\n- [New] Penyempurnaan pop-up notifikasi pembaruan"
+  "versionCode": 31,
+  "versionName": "1.2.4",
+  "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk?v=1.2.4",
+  "releaseNotes": "New in this update:\n- [New] Halaman Rekap Mingguan (1 Minggu Lalu & 2 Minggu Lalu)\n- [New] Apple-style animated capsule segmented control\n- [Improvement] Ikon notifikasi di kanan atas header\n- [Improvement] Navigasi 3 menu: Dashboard, Rekap Mingguan, Rekap Bulanan"
 }
+
+
+

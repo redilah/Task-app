@@ -1,10 +1,11 @@
-export const CURRENT_VERSION_CODE = 26;
-export const CURRENT_VERSION_NAME = '1.1.9';
+export const CURRENT_VERSION_CODE = 31;
+export const CURRENT_VERSION_NAME = '1.2.4';
 
 export const checkForAppUpdates = async () => {
   try {
     // Pada localhost mengambil /version.json lokal, pada production mengambil dari GitHub Raw repository
-    const url = process.env.NODE_ENV === 'development'
+    const isDev = import.meta.env?.DEV ?? false;
+    const url = isDev
       ? `/version.json?t=${Date.now()}`
       : `https://raw.githubusercontent.com/redilah/Task-app/main/public/version.json?t=${Date.now()}`;
 

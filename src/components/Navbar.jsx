@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Calendar, Bell, BellOff, Plus } from 'lucide-react';
+import { LayoutDashboard, Calendar, CalendarDays, Bell, BellOff, Plus } from 'lucide-react';
 import PuncakLogo from './PuncakLogo';
 import { playBirdChirp } from '../utils/audio';
 import { isNative } from '../utils/notifications';
@@ -21,7 +21,7 @@ export default function Navbar({
 
   return (
     <>
-      {/* Desktop & Tablet Header */}
+      {/* Desktop & Mobile Header Sticky */}
       <header className="sticky top-0 z-40 bg-white/70 backdrop-blur-xl saturate-150 border-b border-slate-200/50 shadow-sm transition-all">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div 
@@ -51,6 +51,18 @@ export default function Navbar({
               </button>
 
               <button
+                onClick={() => setActiveTab('weekly')}
+                className={`flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg active:scale-95 transition-all ${
+                  activeTab === 'weekly'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                }`}
+              >
+                <CalendarDays className="w-4 h-4" />
+                Rekap Mingguan
+              </button>
+
+              <button
                 onClick={() => setActiveTab('recap')}
                 className={`flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg active:scale-95 transition-all ${
                   activeTab === 'recap'
@@ -77,6 +89,29 @@ export default function Navbar({
               <span>{notifEnabled ? 'Notif Aktif' : 'Notif'}</span>
             </button>
           </div>
+
+          {/* Notification Toggle Button Mobile / Tablet (Pojok Kanan Atas Header: 2xl:hidden) */}
+          <div className="flex 2xl:hidden items-center">
+            <button
+              onClick={handleNotifClick}
+              className={`p-2 sm:p-2.5 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold ${
+                notifEnabled
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-xs'
+                  : 'bg-slate-100/90 text-slate-500 hover:text-slate-800 border border-slate-200/60 shadow-xs'
+              }`}
+              title={notifEnabled ? 'Notifikasi Aktif' : 'Aktifkan Notifikasi'}
+              aria-label={notifEnabled ? 'Notifikasi Aktif' : 'Aktifkan Notifikasi'}
+            >
+              {notifEnabled ? (
+                <Bell className="w-5 h-5 text-emerald-600 fill-emerald-100" />
+              ) : (
+                <BellOff className="w-5 h-5 text-slate-500" />
+              )}
+              <span className="hidden sm:inline text-[11px] font-semibold">
+                {notifEnabled ? 'Notif Aktif' : 'Notif'}
+              </span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -96,24 +131,8 @@ export default function Navbar({
 
       {/* Mobile & iPad / Tablet Bottom Navigation Bar (Bawah Layar HP & iPad Seri Apapun: 2xl:hidden) */}
       <nav className="2xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#f0f4f8] px-4 py-2.5 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.06)] border-t border-slate-200 transition-all">
-        {/* Overlay tidak diperlukan lagi karena background sudah solid */}
         <div className="max-w-md mx-auto grid grid-cols-3 items-center text-center relative z-10">
-          {/* 1. Tombol Notifikasi Pengingat */}
-          <button
-            onClick={handleNotifClick}
-            className={`flex flex-col items-center gap-1 py-1 rounded-xl active:scale-95 transition-all ${
-              notifEnabled ? 'text-emerald-600 font-bold' : 'text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            {notifEnabled ? (
-              <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 fill-emerald-100" />
-            ) : (
-              <BellOff className="w-5 h-5 sm:w-6 sm:h-6" />
-            )}
-            <span className="text-[10px] sm:text-xs font-semibold">{notifEnabled ? 'Notif Aktif' : 'Notifikasi'}</span>
-          </button>
-
-          {/* 2. Dashboard Harian */}
+          {/* 1. Dashboard Harian */}
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`flex flex-col items-center gap-1 py-1 rounded-xl active:scale-95 transition-all ${
@@ -122,6 +141,17 @@ export default function Navbar({
           >
             <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6" />
             <span className="text-[10px] sm:text-xs font-semibold">Dashboard</span>
+          </button>
+
+          {/* 2. Rekap Mingguan */}
+          <button
+            onClick={() => setActiveTab('weekly')}
+            className={`flex flex-col items-center gap-1 py-1 rounded-xl active:scale-95 transition-all ${
+              activeTab === 'weekly' ? 'text-slate-800 font-bold' : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            <CalendarDays className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-[10px] sm:text-xs font-semibold">Rekap Mingguan</span>
           </button>
 
           {/* 3. Rekap Bulanan */}
@@ -139,3 +169,4 @@ export default function Navbar({
     </>
   );
 }
+

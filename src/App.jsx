@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import DailyDashboard from './components/DailyDashboard';
+import WeeklyRecap from './components/WeeklyRecap';
 import MonthlyRecap from './components/MonthlyRecap';
 import TaskModal from './components/TaskModal';
 import UpdateModal from './components/UpdateModal';
@@ -18,7 +19,7 @@ import { sendTelemetrySignal } from './utils/telemetry';
 import { isTaskExpired, isPastDate, getTodayStr } from './utils/dateUtils';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' or 'recap'
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'weekly', or 'recap'
   const [tasks, setTasks] = useState([]);
   const [selectedDate, setSelectedDate] = useState(() => getTodayStr());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -105,6 +106,7 @@ export default function App() {
     setTasks(newTasks);
     saveTasks(newTasks);
     sendTelemetrySignal(newTasks, activeTab);
+    checkDailyReminders(newTasks);
   };
 
   const handleToggleTask = (id) => {
@@ -199,7 +201,7 @@ export default function App() {
         onOpenAddTask={handleOpenAddTask}
       />
 
-      {/* Main Content: Dashboard Harian atau Rekap Bulanan */}
+      {/* Main Content: Dashboard Harian, Rekap Mingguan, atau Rekap Bulanan */}
       <main className="flex-1">
         {activeTab === 'dashboard' && (
           <DailyDashboard 
@@ -213,6 +215,10 @@ export default function App() {
           />
         )}
 
+        {activeTab === 'weekly' && (
+          <WeeklyRecap tasks={tasks} />
+        )}
+
         {activeTab === 'recap' && (
           <MonthlyRecap tasks={tasks} />
         )}
@@ -224,6 +230,7 @@ export default function App() {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveTask}
         editingTask={editingTask}
+        tasks={tasks}
       />
 
       {/* In-App Auto Update Modal Dialog (Cara B) */}
