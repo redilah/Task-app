@@ -75,7 +75,7 @@ const saveTasksToFirestore = async (syncKey, tasks) => {
       tasks:         { arrayValue:   { values: tasks.map(formatTaskToFirestore) } },
       taskCount:     { integerValue: String(tasks.length) },
       lastUpdated:   { integerValue: String(Date.now()) },
-      lastUpdatedBy: { stringValue:  'ChatGPT MCP Plugin' }
+      lastUpdatedBy: { stringValue:  'Puncak MCP Server' }
     }
   };
   try {
@@ -195,7 +195,7 @@ export const handler = async (event) => {
   if (event.httpMethod === 'GET') {
     const acceptHeader = (reqHeaders.accept || reqHeaders.Accept || '').toLowerCase();
 
-    // SSE Handshake (beberapa versi ChatGPT mengirim Accept: text/event-stream)
+    // SSE Handshake (untuk backward compatibility dengan client lama yang expect text/event-stream di GET)
     if (acceptHeader.includes('text/event-stream')) {
       const mcpUrl = syncKey
         ? `https://puncak-tasks.netlify.app/api/mcp?syncKey=${encodeURIComponent(syncKey)}`
@@ -245,20 +245,20 @@ export const handler = async (event) => {
     return rpcOk(requestId, {}, corsHeaders);
   }
 
-  // 1. Initialize / Discover
-  if (method === 'initialize' || method === 'server/discover') {
+  // 1. Initialize
+  if (method === 'initialize') {
     const clientVersion = params.protocolVersion || '2024-11-05';
     return rpcOk(requestId, {
       protocolVersion: clientVersion,
       capabilities:    { tools: { listChanged: false } },
       serverInfo:      { name: 'puncak-tasks', version: '1.2.5' },
-      supportedProtocolVersions: ['2024-11-05', '2025-03-01', '2025-11-25', '2026-07-28']
+      supportedProtocolVersions: ['2024-11-05', '2025-03-26']
     }, corsHeaders);
   }
 
   // 2. Notifications (one-way, tidak butuh response body)
   if (method === 'notifications/initialized' || method === 'initialized') {
-    return { statusCode: 204, headers: corsHeaders, body: '' };
+    return { statusCode: 202, headers: corsHeaders, body: '' };
   }
 
   // 3. tools/list
@@ -311,7 +311,7 @@ export const handler = async (event) => {
       const todayStr = new Date().toISOString().split('T')[0];
       const taskDate = args.date || todayStr;
       const newTask = {
-        id:           'gpt_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36),
+        id:           'pnc_mcp_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36),
         title:        String(args.title).trim(),
         category:     args.category || 'Pribadi',
         priority:     args.priority || 'medium',
