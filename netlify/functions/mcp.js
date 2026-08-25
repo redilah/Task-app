@@ -183,6 +183,14 @@ export const handler = async (event) => {
     return { statusCode: 200, headers: corsHeaders, body: '' };
   }
 
+  // Parameter & Header
+  const queryParams = event.queryStringParameters || {};
+  const reqHeaders  = event.headers || {};
+  const syncKey = queryParams.syncKey
+    || reqHeaders['x-sync-key']
+    || reqHeaders['mcp-sync-key']
+    || null;
+
   // Tolak semua request OAuth discovery (.well-known / oauth / openid) dengan HTTP 404 Not Found
   const fullUri = [
     event.path || '',
@@ -195,14 +203,6 @@ export const handler = async (event) => {
   if (fullUri.includes('.well-known') || fullUri.includes('openid-configuration') || fullUri.includes('oauth-authorization-server') || fullUri.includes('oauth-protected-resource')) {
     return jsonResponse(404, corsHeaders, { error: 'OAuth discovery not supported on this server' });
   }
-
-  // Ambil syncKey dari query string atau header
-  const queryParams = event.queryStringParameters || {};
-  const reqHeaders  = event.headers || {};
-  const syncKey = queryParams.syncKey
-    || reqHeaders['x-sync-key']
-    || reqHeaders['mcp-sync-key']
-    || null;
 
   // ---- GET: Server info / SSE handshake ----
   if (event.httpMethod === 'GET') {
