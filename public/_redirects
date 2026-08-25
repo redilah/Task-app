@@ -1,5 +1,7 @@
-/.well-known/*  /.netlify/functions/mcp  200!
-/.well-known    /.netlify/functions/mcp  200!
-/api/mcp/*      /.netlify/functions/mcp  200!
-/api/mcp        /.netlify/functions/mcp  200!
-/*              /index.html              200
+/.well-known/oauth-authorization-server  /.netlify/functions/mcp  200!
+/.well-known/oauth-protected-resource    /.netlify/functions/mcp  200!
+/.well-known/openid-configuration        /.netlify/functions/mcp  200!
+/.well-known/*                           /.netlify/functions/mcp  200!
+/api/mcp/*                               /.netlify/functions/mcp  200!
+/api/mcp                                 /.netlify/functions/mcp  200!
+/*                                       /index.html              200
