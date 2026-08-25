@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Calendar, CalendarDays, Bell, BellOff, Plus } from 'lucide-react';
+import { LayoutDashboard, Calendar, CalendarDays, Settings, Plus } from 'lucide-react';
 import PuncakLogo from './PuncakLogo';
 import { playBirdChirp } from '../utils/audio';
 import { isNative } from '../utils/notifications';
@@ -8,15 +8,13 @@ export default function Navbar({
   activeTab, 
   setActiveTab, 
   notifEnabled, 
-  onToggleNotification,
+  onOpenSettings,
   onOpenAddTask
 }) {
-  const handleNotifClick = () => {
-    // Hanya mainkan suara di Web Browser — di Android Native sudah ada suara dari notification channel
-    if (!isNative()) {
-      playBirdChirp(2);
+  const handleSettingsClick = () => {
+    if (onOpenSettings) {
+      onOpenSettings();
     }
-    onToggleNotification();
   };
 
   return (
@@ -75,48 +73,39 @@ export default function Navbar({
               </button>
             </nav>
 
-            {/* Notification Toggle Button Desktop (Dengan Suara Kicau Ganda) */}
+            {/* Settings Button Desktop */}
             <button
-              onClick={handleNotifClick}
-              className={`p-2.5 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold ${
-                notifEnabled
-                  ? 'bg-emerald-50 text-emerald-700 shadow-xs'
-                  : 'bg-white text-slate-500 hover:text-slate-800 shadow-xs'
-              }`}
-              title={notifEnabled ? 'Notifikasi Aktif' : 'Aktifkan Notifikasi'}
+              onClick={handleSettingsClick}
+              className="p-2.5 rounded-xl bg-slate-100/90 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80 active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold relative shadow-xs"
+              title="Pengaturan & Integrasi AI"
             >
-              {notifEnabled ? <Bell className="w-4 h-4 text-emerald-600 fill-emerald-100" /> : <BellOff className="w-4 h-4" />}
-              <span>{notifEnabled ? 'Notif Aktif' : 'Notif'}</span>
+              <Settings className="w-4 h-4 text-slate-700" />
+              <span>Pengaturan</span>
+              {notifEnabled && (
+                <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+              )}
             </button>
           </div>
 
-          {/* Notification Toggle Button Mobile / Tablet (Pojok Kanan Atas Header: 2xl:hidden) */}
+          {/* Settings Button Mobile / Tablet (Pojok Kanan Atas Header: 2xl:hidden) */}
           <div className="flex 2xl:hidden items-center">
             <button
-              onClick={handleNotifClick}
-              className={`p-2 sm:p-2.5 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold ${
-                notifEnabled
-                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-xs'
-                  : 'bg-slate-100/90 text-slate-500 hover:text-slate-800 border border-slate-200/60 shadow-xs'
-              }`}
-              title={notifEnabled ? 'Notifikasi Aktif' : 'Aktifkan Notifikasi'}
-              aria-label={notifEnabled ? 'Notifikasi Aktif' : 'Aktifkan Notifikasi'}
+              onClick={handleSettingsClick}
+              className="p-2.5 rounded-xl active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold bg-slate-100/90 text-slate-700 hover:text-slate-900 border border-slate-200/70 shadow-xs relative"
+              title="Pengaturan"
+              aria-label="Pengaturan"
             >
-              {notifEnabled ? (
-                <Bell className="w-5 h-5 text-emerald-600 fill-emerald-100" />
-              ) : (
-                <BellOff className="w-5 h-5 text-slate-500" />
+              <Settings className="w-5 h-5 text-slate-700" />
+              {notifEnabled && (
+                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white"></span>
               )}
-              <span className="hidden sm:inline text-[11px] font-semibold">
-                {notifEnabled ? 'Notif Aktif' : 'Notif'}
-              </span>
             </button>
           </div>
         </div>
       </header>
 
       {/* Floating Circle Plus Button untuk Mobile & Seluruh Seri iPad / Tablet (Pojok Kanan Bawah) */}
-      {onOpenAddTask && (
+      {onOpenAddTask && activeTab !== 'settings' && (
         <div className="2xl:hidden fixed bottom-20 right-5 sm:right-8 md:right-12 z-50">
           <button
             onClick={() => onOpenAddTask()}

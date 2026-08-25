@@ -1,1 +1,3 @@
-/*    /index.html   200
+/api/mcp/*   /.netlify/functions/mcp   200
+/api/mcp     /.netlify/functions/mcp   200
+/*           /index.html               200

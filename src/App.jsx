@@ -5,6 +5,7 @@ import WeeklyRecap from './components/WeeklyRecap';
 import MonthlyRecap from './components/MonthlyRecap';
 import TaskModal from './components/TaskModal';
 import UpdateModal from './components/UpdateModal';
+import SettingsView from './components/SettingsView';
 import AdminDashboard from './components/AdminDashboard';
 import { loadTasks, saveTasks } from './utils/storage';
 import { 
@@ -17,9 +18,10 @@ import {
 import { checkForAppUpdates } from './utils/version';
 import { sendTelemetrySignal } from './utils/telemetry';
 import { isTaskExpired, isPastDate, getTodayStr } from './utils/dateUtils';
+import { isSyncEnabled, pushTasksToCloud, pullTasksFromCloud } from './utils/cloudSync';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'weekly', or 'recap'
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'weekly', 'recap', or 'settings'
   const [tasks, setTasks] = useState([]);
   const [selectedDate, setSelectedDate] = useState(() => getTodayStr());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,6 +44,18 @@ export default function App() {
 
     if (isNotifOn) {
       checkDailyReminders(loaded);
+    }
+
+    // Coba sinkronisasi awal dengan Cloud Firestore (luminacube-rubik-game) jika sync aktif
+    if (isSyncEnabled()) {
+      pullTasksFromCloud().then(remoteTasks => {
+        if (remoteTasks && Array.isArray(remoteTasks) && remoteTasks.length > 0) {
+          setTasks(remoteTasks);
+          saveTasks(remoteTasks);
+        } else {
+          pushTasksToCloud(loaded);
+        }
+      });
     }
 
     // Deteksi Rute Khusus Admin HANYA pada Web Browser (Bukan APK Android Native)
@@ -71,12 +85,8 @@ export default function App() {
   }, []);
 
   // Kirim telemetri setiap kali jumlah tugas atau tab berubah
-  // PENTING: Gunakan isInitialized flag untuk mencegah race condition —
-  // pada first render, tasks masih [] (state awal) sebelum setTasks(loaded) selesai,
-  // sehingga bisa mengirim taskCount: 0 dan menimpa data yang benar dari effect pertama.
   useEffect(() => {
     if (!isInitialized.current) {
-      // Tandai bahwa first render sudah selesai — jangan kirim telemetri dengan data kosong
       isInitialized.current = true;
       return;
     }
@@ -90,8 +100,6 @@ export default function App() {
         setNotifEnabled(true);
         checkDailyReminders(tasks);
       } else {
-        // Di Android Native JANGAN gunakan alert() — bisa crash di Capacitor WebView
-        // Capacitor sudah menampilkan dialog izin OS sendiri, tidak perlu pesan tambahan
         if (!isNative()) {
           alert('Izin notifikasi tidak diberikan. Harap izinkan notifikasi pada pengaturan browser Anda.');
         }
@@ -107,16 +115,17 @@ export default function App() {
     saveTasks(newTasks);
     sendTelemetrySignal(newTasks, activeTab);
     checkDailyReminders(newTasks);
+    if (isSyncEnabled()) {
+      pushTasksToCloud(newTasks);
+    }
   };
 
   const handleToggleTask = (id) => {
     const updated = tasks.map(t => {
       if (t.id === id) {
-        // Mencegah toggle HANYA JIKA tugas sudah kadaluwarsa (>24 jam dari dibuat)
         if (isTaskExpired(t)) {
           return t;
         }
-        // Jika masih dalam 24 jam, bebas toggle completed (true / false)
         return { ...t, completed: !t.completed };
       }
       return t;
@@ -125,13 +134,10 @@ export default function App() {
   };
 
   const handleDeleteTask = (id) => {
-    // window.confirm() bisa freeze di beberapa versi Capacitor Android
-    // Gunakan try-catch agar aman di semua platform
     let confirmed = false;
     try {
       confirmed = window.confirm('Apakah Anda yakin ingin menghapus tugas ini?');
     } catch (e) {
-      // Jika confirm tidak tersedia, langsung hapus (fallback untuk Android native)
       confirmed = true;
     }
     if (confirmed) {
@@ -156,6 +162,14 @@ export default function App() {
       updated = [taskData, ...tasks];
     }
     updateTasks(updated);
+  };
+
+  const handleTasksSyncedFromSettings = (remoteTasks) => {
+    if (Array.isArray(remoteTasks)) {
+      setTasks(remoteTasks);
+      saveTasks(remoteTasks);
+      checkDailyReminders(remoteTasks);
+    }
   };
 
   const handleCloseUpdateModal = () => {
@@ -192,16 +206,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f0f4f8] font-sans text-slate-900 selection:bg-slate-700 selection:text-white">
-      {/* Header Navbar Puncak (Dengan Toggle Notifikasi) */}
+      {/* Header Navbar Puncak (Dengan Tombol Pengaturan & Integrasi AI) */}
       <Navbar 
         activeTab={activeTab} 
         setActiveTab={handleSwitchTab} 
         notifEnabled={notifEnabled}
-        onToggleNotification={handleToggleNotification}
+        onOpenSettings={() => handleSwitchTab('settings')}
         onOpenAddTask={handleOpenAddTask}
       />
 
-      {/* Main Content: Dashboard Harian, Rekap Mingguan, atau Rekap Bulanan */}
+      {/* Main Content: Dashboard Harian, Rekap Mingguan, Rekap Bulanan, atau Halaman Pengaturan */}
       <main className="flex-1">
         {activeTab === 'dashboard' && (
           <DailyDashboard 
@@ -221,6 +235,16 @@ export default function App() {
 
         {activeTab === 'recap' && (
           <MonthlyRecap tasks={tasks} />
+        )}
+
+        {activeTab === 'settings' && (
+          <SettingsView 
+            onBack={() => handleSwitchTab('dashboard')}
+            notifEnabled={notifEnabled}
+            onToggleNotification={handleToggleNotification}
+            tasks={tasks}
+            onTasksSynced={handleTasksSyncedFromSettings}
+          />
         )}
       </main>
 
