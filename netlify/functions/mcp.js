@@ -183,6 +183,12 @@ export const handler = async (event) => {
     return { statusCode: 200, headers: corsHeaders, body: '' };
   }
 
+  // Tolak semua request OAuth discovery (.well-known) dengan HTTP 404 Not Found
+  const path = event.path || '';
+  if (path.includes('.well-known')) {
+    return jsonResponse(404, corsHeaders, { error: 'OAuth discovery not supported' });
+  }
+
   // Ambil syncKey dari query string atau header
   const queryParams = event.queryStringParameters || {};
   const reqHeaders  = event.headers || {};

@@ -62,3 +62,9 @@ Sebelum menyebut path file, URL raw GitHub, atau nama file dalam instruksi kepad
 ## Ketentuan Debug Sideload Keystore (WAJIB)
 
 - Untuk pengujian langsung di HP pengguna, selalu gunakan build standar `gradlew assembleDebug` kecuali user secara eksplisit meminta release signature. Hal ini mencegah error Android `Package conflict with existing package`.
+
+## Standar Pembuatan File ZIP & Konfigurasi (WAJIB)
+
+- **Wajib Forward Slash (/) di ZIP**: Saat membuat arsip `.zip` di lingkungan Windows (untuk plugin Claude, bundle MCP, atau distribusi cross-platform), DILARANG menggunakan tool yang menyimpan backslash (`\`) sebagai pemisah direktori. Wajib gunakan `tar -a -c -f output.zip -C <dir> .` atau script Node/Python agar entri path selalu menggunakan `/` standar.
+- **Wajib UTF-8 Tanpa BOM**: Saat membuat file JSON/manifest/config via PowerShell/Node, pastikan ditulis menggunakan UTF-8 No BOM (hindari `Set-Content -Encoding utf8` standar PowerShell 5.1 yang menambahkan 3 byte BOM). Gunakan `[System.IO.File]::WriteAllText($path, $text, (New-Object System.Text.UTF8Encoding($false)))` atau Node.js `fs.writeFileSync`.
+- **Unix Line Endings (LF)**: Selalu gunakan line ending `\n` (LF) untuk file manifest dan JSON cross-platform.
