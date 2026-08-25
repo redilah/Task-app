@@ -183,10 +183,17 @@ export const handler = async (event) => {
     return { statusCode: 200, headers: corsHeaders, body: '' };
   }
 
-  // Tolak semua request OAuth discovery (.well-known) dengan HTTP 404 Not Found
-  const path = event.path || '';
-  if (path.includes('.well-known')) {
-    return jsonResponse(404, corsHeaders, { error: 'OAuth discovery not supported' });
+  // Tolak semua request OAuth discovery (.well-known / oauth / openid) dengan HTTP 404 Not Found
+  const fullUri = [
+    event.path || '',
+    event.rawUrl || '',
+    reqHeaders['x-nf-original-uri'] || '',
+    reqHeaders['x-forwarded-uri'] || '',
+    reqHeaders['x-original-uri'] || ''
+  ].join(' ').toLowerCase();
+
+  if (fullUri.includes('.well-known') || fullUri.includes('openid-configuration') || fullUri.includes('oauth-authorization-server') || fullUri.includes('oauth-protected-resource')) {
+    return jsonResponse(404, corsHeaders, { error: 'OAuth discovery not supported on this server' });
   }
 
   // Ambil syncKey dari query string atau header
