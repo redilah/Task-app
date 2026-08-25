@@ -1,80 +1,101 @@
+// ============================================================
+// Puncak MCP Server — Netlify Function
+// Transport: Streamable HTTP (JSON-RPC 2.0)
+// Protocol:  MCP 2024-11-05 (kompatibel 2025-03-01, 2025-11-25, 2026-07-28)
+// ============================================================
+
 const FIREBASE_PROJECT_ID = 'luminacube-rubik-game';
 const FIREBASE_API_KEY = 'AIzaSyAXEFbCQp57MIb_t_AuFeevY1O1kMT_Ni8';
 const FIRESTORE_BASE_URL = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
 
-// Helper format task ke Firestore Document Value
+// Validasi format syncKey: wajib diawali "pnc_" dan minimal 8 karakter
+const isValidSyncKey = (key) => {
+  if (!key || typeof key !== 'string') return false;
+  if (!key.startsWith('pnc_')) return false;
+  if (key.length < 8) return false;
+  return true;
+};
+
+// ---- Firestore Helpers ----
+
 const formatTaskToFirestore = (task) => ({
   mapValue: {
     fields: {
-      id: { stringValue: String(task.id || Date.now()) },
-      title: { stringValue: String(task.title || '') },
-      category: { stringValue: String(task.category || 'General') },
-      priority: { stringValue: String(task.priority || 'medium') },
-      date: { stringValue: String(task.date || '') },
-      completed: { booleanValue: Boolean(task.completed) },
-      createdMonth: { stringValue: String(task.createdMonth || '') },
-      createdAt: { integerValue: String(task.createdAt || Date.now()) },
-      updatedAt: { integerValue: String(Date.now()) }
+      id:           { stringValue:  String(task.id || Date.now()) },
+      title:        { stringValue:  String(task.title || '') },
+      category:     { stringValue:  String(task.category || 'General') },
+      priority:     { stringValue:  String(task.priority || 'medium') },
+      date:         { stringValue:  String(task.date || '') },
+      completed:    { booleanValue: Boolean(task.completed) },
+      createdMonth: { stringValue:  String(task.createdMonth || '') },
+      createdAt:    { integerValue: String(task.createdAt || Date.now()) },
+      updatedAt:    { integerValue: String(Date.now()) }
     }
   }
 });
 
-// Helper parse Firestore Document Value ke Task Object
 const parseFirestoreToTask = (mapVal) => {
   const fields = mapVal?.fields || {};
   return {
-    id: fields.id?.stringValue || String(Date.now()),
-    title: fields.title?.stringValue || 'Untitled',
-    category: fields.category?.stringValue || 'General',
-    priority: fields.priority?.stringValue || 'medium',
-    date: fields.date?.stringValue || '',
-    completed: fields.completed?.booleanValue ?? false,
-    createdMonth: fields.createdMonth?.stringValue || '',
-    createdAt: parseInt(fields.createdAt?.integerValue || Date.now()),
-    updatedAt: parseInt(fields.updatedAt?.integerValue || Date.now())
+    id:           fields.id?.stringValue           || String(Date.now()),
+    title:        fields.title?.stringValue         || 'Untitled',
+    category:     fields.category?.stringValue      || 'General',
+    priority:     fields.priority?.stringValue      || 'medium',
+    date:         fields.date?.stringValue          || '',
+    completed:    fields.completed?.booleanValue    ?? false,
+    createdMonth: fields.createdMonth?.stringValue  || '',
+    createdAt:    parseInt(fields.createdAt?.integerValue  || Date.now()),
+    updatedAt:    parseInt(fields.updatedAt?.integerValue  || Date.now())
   };
 };
 
-// Ambil data task dari Firestore
 const getTasksFromFirestore = async (syncKey) => {
   try {
     const docUrl = `${FIRESTORE_BASE_URL}/puncak_user_tasks/${syncKey}?key=${FIREBASE_API_KEY}`;
     const res = await fetch(docUrl);
     if (!res.ok) {
       if (res.status === 404) return [];
+      console.error('[MCP] Firestore GET error:', res.status, await res.text());
       return [];
     }
     const data = await res.json();
     const raw = data.fields?.tasks?.arrayValue?.values || [];
     return raw.map(v => parseFirestoreToTask(v.mapValue));
   } catch (e) {
+    console.error('[MCP] getTasksFromFirestore exception:', e.message);
     return [];
   }
 };
 
-// Simpan data task ke Firestore
 const saveTasksToFirestore = async (syncKey, tasks) => {
   const docUrl = `${FIRESTORE_BASE_URL}/puncak_user_tasks/${syncKey}?key=${FIREBASE_API_KEY}`;
-  const taskValues = tasks.map(formatTaskToFirestore);
   const payload = {
     fields: {
-      syncKey: { stringValue: syncKey },
-      tasks: { arrayValue: { values: taskValues } },
-      taskCount: { integerValue: String(tasks.length) },
-      lastUpdated: { integerValue: String(Date.now()) },
-      lastUpdatedBy: { stringValue: 'ChatGPT MCP Plugin' }
+      syncKey:       { stringValue:  syncKey },
+      tasks:         { arrayValue:   { values: tasks.map(formatTaskToFirestore) } },
+      taskCount:     { integerValue: String(tasks.length) },
+      lastUpdated:   { integerValue: String(Date.now()) },
+      lastUpdatedBy: { stringValue:  'ChatGPT MCP Plugin' }
     }
   };
-
-  const res = await fetch(docUrl, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-  return res.ok;
+  try {
+    const res = await fetch(docUrl, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      console.error('[MCP] Firestore PATCH error:', res.status, await res.text());
+    }
+    return res.ok;
+  } catch (e) {
+    console.error('[MCP] saveTasksToFirestore exception:', e.message);
+    return false;
+  }
 };
 
-// Daftar Tools MCP resmi ChatGPT JSON-RPC 2.0
+// ---- Tool Definitions ----
+
 const MCP_TOOLS = [
   {
     name: 'get_tasks',
@@ -85,7 +106,7 @@ const MCP_TOOLS = [
         filter: {
           type: 'string',
           enum: ['all', 'active', 'completed'],
-          description: 'Filter status tugas (all, active, completed)'
+          description: 'Filter status tugas (all, active, completed). Default: all'
         }
       }
     }
@@ -96,10 +117,10 @@ const MCP_TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
-        title: { type: 'string', description: 'Judul tugas' },
-        category: { type: 'string', description: 'Kategori (Kerja, Pribadi, Rumah, Belanja, Kesehatan, dll)' },
-        priority: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Prioritas tugas' },
-        date: { type: 'string', description: 'Tanggal YYYY-MM-DD (contoh: 2026-08-25)' }
+        title:    { type: 'string', description: 'Judul tugas (wajib)' },
+        category: { type: 'string', description: 'Kategori: Kerja, Pribadi, Rumah, Belanja, Kesehatan, dll' },
+        priority: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Prioritas tugas. Default: medium' },
+        date:     { type: 'string', description: 'Tanggal jatuh tempo format YYYY-MM-DD. Default: hari ini' }
       },
       required: ['title']
     }
@@ -110,8 +131,8 @@ const MCP_TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
-        taskId: { type: 'string', description: 'ID tugas' },
-        searchTitle: { type: 'string', description: 'Judul tugas' }
+        taskId:      { type: 'string', description: 'ID tugas (dari get_tasks)' },
+        searchTitle: { type: 'string', description: 'Kata kunci judul tugas (pencarian parsial)' }
       }
     }
   },
@@ -121,298 +142,269 @@ const MCP_TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
-        taskId: { type: 'string', description: 'ID tugas yang ingin dihapus' },
-        searchTitle: { type: 'string', description: 'Judul tugas yang ingin dihapus' }
+        taskId:      { type: 'string', description: 'ID tugas yang ingin dihapus' },
+        searchTitle: { type: 'string', description: 'Kata kunci judul tugas yang ingin dihapus' }
       }
     }
   }
 ];
 
+// ---- JSON-RPC Helpers ----
+
+const jsonResponse = (statusCode, headers, data) => ({
+  statusCode,
+  headers: { ...headers, 'Content-Type': 'application/json' },
+  body: JSON.stringify(data)
+});
+
+const rpcOk  = (id, result, headers) =>
+  jsonResponse(200, headers, { jsonrpc: '2.0', id, result });
+
+const rpcErr = (id, code, message, headers) =>
+  jsonResponse(200, headers, { jsonrpc: '2.0', id, error: { code, message } });
+
+// ============================================================
+// Handler utama
+// ============================================================
+
 export const handler = async (event) => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
+  const corsHeaders = {
+    'Access-Control-Allow-Origin':  '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-sync-key, mcp-session-id',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, HEAD',
-    'Content-Type': 'application/json'
+    'Cache-Control':                'no-store'
   };
 
-  if (event.httpMethod === 'OPTIONS' || event.httpMethod === 'HEAD') {
-    return { statusCode: 200, headers, body: '' };
+  // CORS preflight
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: corsHeaders, body: '' };
+  }
+  if (event.httpMethod === 'HEAD') {
+    return { statusCode: 200, headers: corsHeaders, body: '' };
   }
 
+  // Ambil syncKey dari query string atau header
   const queryParams = event.queryStringParameters || {};
-  const reqHeaders = event.headers || {};
-  const syncKey = queryParams.syncKey || reqHeaders['x-sync-key'] || 'pnc_default';
+  const reqHeaders  = event.headers || {};
+  const syncKey = queryParams.syncKey
+    || reqHeaders['x-sync-key']
+    || reqHeaders['mcp-sync-key']
+    || null;
 
-  // GET: Handshake / SSE Endpoint
+  // ---- GET: Server info / SSE handshake ----
   if (event.httpMethod === 'GET') {
-    // SSE Stream Handshake
-    const acceptHeader = reqHeaders.accept || reqHeaders.Accept || '';
+    const acceptHeader = (reqHeaders.accept || reqHeaders.Accept || '').toLowerCase();
+
+    // SSE Handshake (beberapa versi ChatGPT mengirim Accept: text/event-stream)
     if (acceptHeader.includes('text/event-stream')) {
-      const endpointUri = `https://puncak-tasks.netlify.app/api/mcp?syncKey=${encodeURIComponent(syncKey)}`;
+      const mcpUrl = syncKey
+        ? `https://puncak-tasks.netlify.app/api/mcp?syncKey=${encodeURIComponent(syncKey)}`
+        : `https://puncak-tasks.netlify.app/api/mcp`;
       return {
         statusCode: 200,
         headers: {
           'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'text/event-stream',
+          'Content-Type':  'text/event-stream',
           'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive'
+          'Connection':    'keep-alive'
         },
-        body: `event: endpoint\ndata: ${endpointUri}\n\n`
+        body: `event: endpoint\ndata: ${mcpUrl}\n\n`
       };
     }
 
-    // Default JSON Response untuk HTTP GET Probe
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        result: {
-          protocolVersion: '2024-11-05',
-          serverInfo: {
-            name: 'puncak-tasks',
-            version: '1.2.5'
-          },
-          capabilities: {
-            tools: { listChanged: false }
-          }
-        }
-      })
-    };
+    // Probe GET standar — kembalikan server info
+    return jsonResponse(200, corsHeaders, {
+      jsonrpc: '2.0',
+      id:      null,
+      result: {
+        protocolVersion: '2024-11-05',
+        serverInfo:      { name: 'puncak-tasks', version: '1.2.5' },
+        capabilities:    { tools: { listChanged: false } }
+      }
+    });
   }
 
-  // POST: JSON-RPC 2.0 Requests dari ChatGPT
-  if (event.httpMethod === 'POST') {
-    let body = {};
-    try {
-      body = JSON.parse(event.body || '{}');
-    } catch (e) {
-      body = {};
+  // ---- POST: JSON-RPC 2.0 ----
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, headers: corsHeaders, body: 'Method Not Allowed' };
+  }
+
+  let body = {};
+  try {
+    body = JSON.parse(event.body || '{}');
+  } catch {
+    return rpcErr(null, -32700, 'Parse error: invalid JSON', corsHeaders);
+  }
+
+  const requestId = body.id !== undefined ? body.id : null;
+  const method    = body.method || '';
+  const params    = body.params || {};
+
+  // 0. Ping
+  if (method === 'ping') {
+    return rpcOk(requestId, {}, corsHeaders);
+  }
+
+  // 1. Initialize / Discover
+  if (method === 'initialize' || method === 'server/discover') {
+    const clientVersion = params.protocolVersion || '2024-11-05';
+    return rpcOk(requestId, {
+      protocolVersion: clientVersion,
+      capabilities:    { tools: { listChanged: false } },
+      serverInfo:      { name: 'puncak-tasks', version: '1.2.5' },
+      supportedProtocolVersions: ['2024-11-05', '2025-03-01', '2025-11-25', '2026-07-28']
+    }, corsHeaders);
+  }
+
+  // 2. Notifications (one-way, tidak butuh response body)
+  if (method === 'notifications/initialized' || method === 'initialized') {
+    return { statusCode: 204, headers: corsHeaders, body: '' };
+  }
+
+  // 3. tools/list
+  if (method === 'tools/list') {
+    return rpcOk(requestId, { tools: MCP_TOOLS }, corsHeaders);
+  }
+
+  // 4. tools/call — butuh syncKey valid
+  if (method === 'tools/call') {
+    // Validasi syncKey sebelum akses Firestore
+    if (!isValidSyncKey(syncKey)) {
+      return rpcOk(requestId, {
+        content: [{
+          type: 'text',
+          text: '❌ Authentication error: syncKey tidak ada atau tidak valid. Pastikan URL mengandung ?syncKey=pnc_xxxx atau header x-sync-key diisi. Dapatkan syncKey dari menu Sinkronisasi di aplikasi Puncak.'
+        }],
+        isError: true
+      }, corsHeaders);
     }
 
-    const requestId = body.id !== undefined ? body.id : 1;
-    const method = body.method;
-    const params = body.params || {};
+    const toolName = params.name;
+    const args     = params.arguments || {};
 
-    // 0. Ping
-    if (method === 'ping') {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: requestId,
-          result: {}
-        })
+    // Ambil tasks dari Firestore
+    const currentTasks = await getTasksFromFirestore(syncKey);
+
+    // ---- get_tasks ----
+    if (toolName === 'get_tasks') {
+      let list = currentTasks;
+      if (args.filter === 'active')    list = currentTasks.filter(t => !t.completed);
+      if (args.filter === 'completed') list = currentTasks.filter(t =>  t.completed);
+
+      const summary = list.length === 0
+        ? 'Tidak ada tugas ditemukan.'
+        : `Ditemukan ${list.length} tugas.`;
+
+      return rpcOk(requestId, {
+        content: [{ type: 'text', text: `${summary}\n\n${JSON.stringify(list, null, 2)}` }]
+      }, corsHeaders);
+    }
+
+    // ---- add_task ----
+    if (toolName === 'add_task') {
+      if (!args.title || !String(args.title).trim()) {
+        return rpcOk(requestId, {
+          content: [{ type: 'text', text: '❌ Judul tugas (title) wajib diisi.' }],
+          isError: true
+        }, corsHeaders);
+      }
+      const todayStr = new Date().toISOString().split('T')[0];
+      const taskDate = args.date || todayStr;
+      const newTask = {
+        id:           'gpt_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36),
+        title:        String(args.title).trim(),
+        category:     args.category || 'Pribadi',
+        priority:     args.priority || 'medium',
+        date:         taskDate,
+        completed:    false,
+        createdMonth: taskDate.substring(0, 7),
+        createdAt:    Date.now(),
+        updatedAt:    Date.now()
       };
+
+      const updated = [newTask, ...currentTasks];
+      const saved   = await saveTasksToFirestore(syncKey, updated);
+
+      return rpcOk(requestId, {
+        content: [{
+          type: 'text',
+          text: saved
+            ? `✅ Tugas "${newTask.title}" (${newTask.priority}, ${newTask.category}) berhasil ditambahkan untuk tanggal ${newTask.date}. ID: ${newTask.id}`
+            : `⚠️ Tugas dibuat secara lokal tapi gagal disimpan ke server. Coba lagi.`
+        }]
+      }, corsHeaders);
     }
 
-    // 1. Handshake / Initialize & Discover
-    if (method === 'initialize' || method === 'server/discover') {
-      const clientProtocolVersion = params.protocolVersion || '2024-11-05';
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: requestId,
-          result: {
-            protocolVersion: clientProtocolVersion,
-            capabilities: {
-              tools: { listChanged: false }
-            },
-            serverInfo: {
-              name: 'puncak-tasks',
-              version: '1.2.5'
-            },
-            supportedProtocolVersions: ['2024-11-05', '2025-03-01', '2025-11-25', '2026-07-28']
-          }
-        })
-      };
-    }
-
-    // 2. Notifications (notifications/initialized)
-    if (method === 'notifications/initialized' || method === 'initialized') {
-      return { statusCode: 200, headers, body: '' };
-    }
-
-    // 3. List Tools (tools/list)
-    if (method === 'tools/list' || method === 'list_tools' || !method) {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: requestId,
-          result: {
-            tools: MCP_TOOLS
-          }
-        })
-      };
-    }
-
-    // 4. Call Tool (tools/call)
-    if (method === 'tools/call') {
-      const toolName = params.name;
-      const args = params.arguments || {};
-      const currentTasks = await getTasksFromFirestore(syncKey);
-
-      // get_tasks
-      if (toolName === 'get_tasks') {
-        let list = currentTasks;
-        if (args.filter === 'active') list = currentTasks.filter(t => !t.completed);
-        if (args.filter === 'completed') list = currentTasks.filter(t => t.completed);
-
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: requestId,
-            result: {
-              content: [
-                {
-                  type: 'text',
-                  text: JSON.stringify(list, null, 2)
-                }
-              ]
-            }
-          })
-        };
+    // ---- complete_task ----
+    if (toolName === 'complete_task') {
+      if (!args.taskId && !args.searchTitle) {
+        return rpcOk(requestId, {
+          content: [{ type: 'text', text: '❌ Harap sediakan taskId atau searchTitle untuk menyelesaikan tugas.' }],
+          isError: true
+        }, corsHeaders);
       }
 
-      // add_task
-      if (toolName === 'add_task') {
-        const todayStr = new Date().toISOString().split('T')[0];
-        const taskDate = args.date || todayStr;
-        const newTask = {
-          id: 'gpt_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36),
-          title: args.title || 'Tugas Baru',
-          category: args.category || 'Pribadi',
-          priority: args.priority || 'medium',
-          date: taskDate,
-          completed: false,
-          createdMonth: taskDate.substring(0, 7),
-          createdAt: Date.now(),
-          updatedAt: Date.now()
-        };
+      let found   = false;
+      let matched = '';
+      const updated = currentTasks.map(t => {
+        if (args.taskId && t.id === args.taskId) {
+          found = true; matched = t.title;
+          return { ...t, completed: true, updatedAt: Date.now() };
+        }
+        if (args.searchTitle && t.title.toLowerCase().includes(args.searchTitle.toLowerCase())) {
+          found = true; matched = t.title;
+          return { ...t, completed: true, updatedAt: Date.now() };
+        }
+        return t;
+      });
 
-        const updated = [newTask, ...currentTasks];
+      if (found) {
         await saveTasksToFirestore(syncKey, updated);
-
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: requestId,
-            result: {
-              content: [
-                {
-                  type: 'text',
-                  text: `Tugas "${newTask.title}" berhasil ditambahkan ke aplikasi Puncak untuk tanggal ${newTask.date}.`
-                }
-              ]
-            }
-          })
-        };
-      }
-
-      // complete_task
-      if (toolName === 'complete_task') {
-        let found = false;
-        const updated = currentTasks.map(t => {
-          if (args.taskId && t.id === args.taskId) {
-            found = true;
-            return { ...t, completed: true, updatedAt: Date.now() };
-          }
-          if (args.searchTitle && t.title.toLowerCase().includes(args.searchTitle.toLowerCase())) {
-            found = true;
-            return { ...t, completed: true, updatedAt: Date.now() };
-          }
-          return t;
-        });
-
-        if (found) {
-          await saveTasksToFirestore(syncKey, updated);
-          return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-              jsonrpc: '2.0',
-              id: requestId,
-              result: {
-                content: [{ type: 'text', text: 'Tugas berhasil ditandai selesai di aplikasi Puncak.' }]
-              }
-            })
-          };
-        } else {
-          return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-              jsonrpc: '2.0',
-              id: requestId,
-              result: {
-                content: [{ type: 'text', text: 'Tugas tidak ditemukan di aplikasi Puncak.' }],
-                isError: true
-              }
-            })
-          };
-        }
-      }
-
-      // delete_task
-      if (toolName === 'delete_task') {
-        const initialCount = currentTasks.length;
-        const updated = currentTasks.filter(t => {
-          if (args.taskId && t.id === args.taskId) return false;
-          if (args.searchTitle && t.title.toLowerCase().includes(args.searchTitle.toLowerCase())) return false;
-          return true;
-        });
-
-        if (updated.length < initialCount) {
-          await saveTasksToFirestore(syncKey, updated);
-          return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-              jsonrpc: '2.0',
-              id: requestId,
-              result: {
-                content: [{ type: 'text', text: 'Tugas berhasil dihapus dari aplikasi Puncak.' }]
-              }
-            })
-          };
-        } else {
-          return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-              jsonrpc: '2.0',
-              id: requestId,
-              result: {
-                content: [{ type: 'text', text: 'Tugas tidak ditemukan untuk dihapus.' }],
-                isError: true
-              }
-            })
-          };
-        }
+        return rpcOk(requestId, {
+          content: [{ type: 'text', text: `✅ Tugas "${matched}" berhasil ditandai selesai di aplikasi Puncak.` }]
+        }, corsHeaders);
+      } else {
+        return rpcOk(requestId, {
+          content: [{ type: 'text', text: `❌ Tugas tidak ditemukan. Gunakan get_tasks untuk melihat daftar tugas yang tersedia.` }],
+          isError: true
+        }, corsHeaders);
       }
     }
 
-    // Default Fallback Response
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: requestId,
-        error: { code: -32601, message: `Method '${method}' not found` }
-      })
-    };
+    // ---- delete_task ----
+    if (toolName === 'delete_task') {
+      if (!args.taskId && !args.searchTitle) {
+        return rpcOk(requestId, {
+          content: [{ type: 'text', text: '❌ Harap sediakan taskId atau searchTitle untuk menghapus tugas.' }],
+          isError: true
+        }, corsHeaders);
+      }
+
+      const initialCount = currentTasks.length;
+      let deletedTitle   = '';
+      const updated = currentTasks.filter(t => {
+        if (args.taskId && t.id === args.taskId)                                                { deletedTitle = t.title; return false; }
+        if (args.searchTitle && t.title.toLowerCase().includes(args.searchTitle.toLowerCase())) { deletedTitle = t.title; return false; }
+        return true;
+      });
+
+      if (updated.length < initialCount) {
+        await saveTasksToFirestore(syncKey, updated);
+        return rpcOk(requestId, {
+          content: [{ type: 'text', text: `✅ Tugas "${deletedTitle}" berhasil dihapus dari aplikasi Puncak.` }]
+        }, corsHeaders);
+      } else {
+        return rpcOk(requestId, {
+          content: [{ type: 'text', text: `❌ Tugas tidak ditemukan. Gunakan get_tasks untuk melihat daftar tugas yang tersedia.` }],
+          isError: true
+        }, corsHeaders);
+      }
+    }
+
+    // Unknown tool
+    return rpcErr(requestId, -32601, `Tool '${toolName}' tidak dikenal. Gunakan tools/list untuk melihat daftar tool.`, corsHeaders);
   }
 
-  return { statusCode: 405, headers, body: 'Method Not Allowed' };
+  // Unknown method
+  return rpcErr(requestId, -32601, `Method '${method}' tidak dikenal.`, corsHeaders);
 };
