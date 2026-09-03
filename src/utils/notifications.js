@@ -226,7 +226,7 @@ export const checkDailyReminders = async (tasks = []) => {
 
           if (taskDateObj.getTime() > nowMs) {
             scheduledTimedNotifs.push({
-              title: `⏰ Pengingat Tugas: ${task.title}`,
+              title: task.title,
               body: 'Yuk selesaikan sekarang!',
               id: 4000 + index,
               smallIcon: 'ic_notification',
@@ -326,7 +326,7 @@ export const checkDailyReminders = async (tasks = []) => {
         if (diffMs > 0 && diffMs < 24 * 60 * 60 * 1000) {
           setTimeout(() => {
             playBirdChirp(2);
-            new Notification(`⏰ Pengingat Tugas: ${task.title}`, {
+            new Notification(task.title, {
               body: 'Yuk selesaikan sekarang!'
             });
           }, diffMs);

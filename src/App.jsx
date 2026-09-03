@@ -7,6 +7,8 @@ import TaskModal from './components/TaskModal';
 import UpdateModal from './components/UpdateModal';
 import SettingsView from './components/SettingsView';
 import AdminDashboard from './components/AdminDashboard';
+import VoiceAssistantModal from './components/VoiceAssistantModal';
+import { Mic, Plus } from 'lucide-react';
 import { loadTasks, saveTasks } from './utils/storage';
 import { 
   getNotificationState, 
@@ -26,6 +28,7 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState(() => getTodayStr());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [notifEnabled, setNotifEnabled] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
   // Flag untuk mencegah race condition telemetri saat first render
@@ -257,12 +260,66 @@ export default function App() {
         tasks={tasks}
       />
 
+      {/* Voice Assistant Modal (Puncak Mic AI) */}
+      <VoiceAssistantModal 
+        isOpen={isVoiceModalOpen}
+        onClose={() => setIsVoiceModalOpen(false)}
+        onSaveTask={handleSaveTask}
+        onOpenEditInModal={(prefillData) => {
+          setEditingTask(prefillData);
+          setIsModalOpen(true);
+        }}
+      />
+
       {/* In-App Auto Update Modal Dialog (Cara B) */}
       <UpdateModal
         isOpen={isUpdateModalOpen}
         onClose={handleCloseUpdateModal}
         updateInfo={updateInfo}
       />
+
+      {/* Unified Floating Action Buttons Stack (Pojok Kanan Bawah, Rapi di Atas Bottom Nav) */}
+      {!isModalOpen && !isUpdateModalOpen && activeTab !== 'settings' && (
+        <div className="fixed bottom-20 2xl:bottom-8 right-4 sm:right-6 md:right-8 z-40 flex flex-col items-center gap-2.5">
+          {/* 1. Tombol Tambah Manual (+) */}
+          <button
+            type="button"
+            onClick={() => handleOpenAddTask()}
+            className="w-12 h-12 sm:w-13 sm:h-13 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 rounded-full flex items-center justify-center shadow-md shadow-slate-300/40 border border-slate-200/90 active:scale-95 transition-all duration-200 cursor-pointer"
+            title="Tambah Tugas Manual (+)"
+            aria-label="Tambah Tugas Manual"
+          >
+            <Plus className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
+          </button>
+
+          {/* 2. Tombol Voice Assistant (Mic) Cassiel-Style */}
+          <button
+            type="button"
+            onClick={() => setIsVoiceModalOpen(prev => !prev)}
+            className={`group relative flex items-center justify-center w-12 h-12 sm:w-13 sm:h-13 rounded-full shadow-lg border active:scale-95 transition-all duration-200 focus:outline-none cursor-pointer ${
+              isVoiceModalOpen
+                ? 'bg-rose-600 border-rose-500 shadow-rose-600/40 text-white animate-pulse'
+                : 'bg-slate-900 hover:bg-slate-800 border-slate-700/60 shadow-slate-900/30 text-white'
+            }`}
+            title={isVoiceModalOpen ? 'Tutup Asisten Suara' : 'Bicara untuk Buat Tugas (Voice Assistant)'}
+            aria-label="Asisten Suara Tugas"
+          >
+            {/* Glowing Pulse Accent Ring */}
+            <span className={`absolute -inset-1 rounded-full blur-xs transition-opacity duration-300 animate-pulse ${
+              isVoiceModalOpen
+                ? 'bg-rose-500 opacity-60'
+                : 'bg-gradient-to-tr from-indigo-500 via-purple-500 to-amber-400 opacity-40 group-hover:opacity-80'
+            }`} />
+            
+            {/* Mic Icon & Inner Circle */}
+            <span className={`relative z-10 flex items-center justify-center w-full h-full rounded-full transition-colors ${
+              isVoiceModalOpen ? 'bg-rose-600 text-white' : 'bg-slate-900 group-hover:bg-slate-800 text-indigo-300 group-hover:text-white'
+            }`}>
+              <Mic className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+            </span>
+          </button>
+        </div>
+      )}
 
       {/* Clean Mobile Friendly Footer */}
       <footer className="hidden sm:block bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">

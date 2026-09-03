@@ -108,13 +108,13 @@ export default function WeeklyRecap({ tasks = [] }) {
         </div>
       </div>
 
-      {/* Apple-style Capsule Segmented Control (Pill dengan Animasi Sliding Smooth) */}
-      <div className="bg-slate-200/80 p-1.5 rounded-full relative shadow-inner mb-6 border border-slate-300/60 max-w-xl mx-auto backdrop-blur-md">
-        {/* Sliding Active Pill Background (Animasi Transisi Geser Khas iOS/Apple) */}
+      {/* Apple-style Capsule Segmented Control (Pill Ramping dengan Animasi Sliding Smooth) */}
+      <div className="bg-slate-200/80 p-1 rounded-full relative shadow-inner mb-6 border border-slate-300/60 max-w-sm mx-auto backdrop-blur-md">
+        {/* Sliding Active Pill Background */}
         <div 
-          className="absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] bg-slate-900 rounded-full shadow-[0_4px_14px_rgba(15,23,42,0.28)] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none"
+          className="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-slate-900 rounded-full shadow-[0_2px_8px_rgba(15,23,42,0.22)] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none"
           style={{
-            transform: selectedRange === '1week' ? 'translateX(0%)' : 'translateX(calc(100% + 6px))'
+            transform: selectedRange === '1week' ? 'translateX(0%)' : 'translateX(calc(100% + 4px))'
           }}
         />
 
@@ -123,14 +123,14 @@ export default function WeeklyRecap({ tasks = [] }) {
           {/* Kapsul 1: 1 Minggu Lalu */}
           <button
             onClick={() => setSelectedRange('1week')}
-            className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-full transition-transform active:scale-95 select-none focus:outline-none"
+            className="flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-full transition-transform active:scale-95 select-none focus:outline-none"
           >
-            <span className={`text-xs sm:text-sm font-bold transition-colors duration-200 ${
+            <span className={`text-xs font-bold transition-colors duration-200 ${
               selectedRange === '1week' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
             }`}>
               1 Minggu Lalu
             </span>
-            <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-all duration-200 ${
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold transition-all duration-200 ${
               selectedRange === '1week' 
                 ? 'bg-white/20 text-white' 
                 : 'bg-slate-300 text-slate-700'
@@ -142,14 +142,14 @@ export default function WeeklyRecap({ tasks = [] }) {
           {/* Kapsul 2: 2 Minggu Lalu */}
           <button
             onClick={() => setSelectedRange('2weeks')}
-            className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-full transition-transform active:scale-95 select-none focus:outline-none"
+            className="flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-full transition-transform active:scale-95 select-none focus:outline-none"
           >
-            <span className={`text-xs sm:text-sm font-bold transition-colors duration-200 ${
+            <span className={`text-xs font-bold transition-colors duration-200 ${
               selectedRange === '2weeks' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
             }`}>
               2 Minggu Lalu
             </span>
-            <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold transition-all duration-200 ${
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold transition-all duration-200 ${
               selectedRange === '2weeks' 
                 ? 'bg-white/20 text-white' 
                 : 'bg-slate-300 text-slate-700'

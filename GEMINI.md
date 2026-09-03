@@ -53,6 +53,13 @@ Sebelum menyebut path file, URL raw GitHub, atau nama file dalam instruksi kepad
 
 **DILARANG** menebak nama file berdasarkan konvensi umum (misal: `PRIVACY_POLICY.md`, `README.md`, dll) tanpa mengecek keberadaannya di filesystem proyek. Contoh kasus: file privasi proyek ini bernama `PRIVACY.md`, **bukan** `PRIVACY_POLICY.md`.
 
+## Pola Floating Voice Assistant Bubble (WAJIB)
+
+- **Floating Column Sebelah Kiri**: Tampilan preview suara mengambang tepat di sebelah kiri tombol Mic (`right-[4.5rem] bottom-20`), bukan di tengah layar.
+- **Borderless & Clean Light Theme**: Gunakan latar putih bersih berbayang lembut tanpa garis tepi (borderless), dengan animasi nada musik, teks ucapan real-time, dan tombol X dalam satu baris terpadu.
+- **Silent Auto-Save**: Simpan tugas secara otomatis setelah jeda bicara selesai tanpa efek suara kicau burung.
+- **Mobile Responsive**: Lebar maksimal `w-[calc(100vw-5.5rem)] max-w-[275px]` agar tidak terpotong pada layar iPhone SE (375px).
+
 ## Pola Custom Wheel Picker & Inertial Scrolling (WAJIB)
 
 - Gunakan fisika inersia/momentum dengan peluruhan gesekan (friction ~0.93) dan magnetic spring snap ke indeks terdekat.

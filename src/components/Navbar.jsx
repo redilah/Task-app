@@ -104,20 +104,6 @@ export default function Navbar({
         </div>
       </header>
 
-      {/* Floating Circle Plus Button untuk Mobile & Seluruh Seri iPad / Tablet (Pojok Kanan Bawah) */}
-      {onOpenAddTask && activeTab !== 'settings' && (
-        <div className="2xl:hidden fixed bottom-20 right-5 sm:right-8 md:right-12 z-50">
-          <button
-            onClick={() => onOpenAddTask()}
-            className="w-12 h-12 sm:w-14 sm:h-14 bg-[#ffffff] hover:bg-slate-50 text-slate-400 hover:text-slate-600 rounded-full flex items-center justify-center shadow-lg border border-slate-200/80 active:scale-95 transition-all"
-            title="Tambah Tugas Baru"
-            aria-label="Tambah Tugas Baru"
-          >
-            <Plus className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" />
-          </button>
-        </div>
-      )}
-
       {/* Mobile & iPad / Tablet Bottom Navigation Bar (Bawah Layar HP & iPad Seri Apapun: 2xl:hidden) */}
       <nav className="2xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#f0f4f8] px-4 py-2.5 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.06)] border-t border-slate-200 transition-all">
         <div className="max-w-md mx-auto grid grid-cols-3 items-center text-center relative z-10">
