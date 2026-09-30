@@ -79,11 +79,21 @@ export default function VoiceAssistantModal({
     }, 700);
   };
 
-  const startListening = () => {
+  const startListening = async () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setErrorMsg('Browser belum mendukung Web Speech API.');
       return;
+    }
+
+    // Pancing dialog izin mikrofon native di WebView Android jika belum diizinkan
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(t => t.stop());
+      } catch (permErr) {
+        console.warn('Microphone prompt check:', permErr);
+      }
     }
 
     try {
@@ -123,7 +133,7 @@ export default function VoiceAssistantModal({
 
       recognition.onerror = (event) => {
         if (event.error === 'not-allowed') {
-          setErrorMsg('Izin mic belum aktif.');
+          setErrorMsg('Izin mic belum aktif. Buka Pengaturan HP > Info Aplikasi > Izin > Mikrofon.');
         } else if (event.error !== 'no-speech') {
           setErrorMsg(`Error: ${event.error}`);
         }

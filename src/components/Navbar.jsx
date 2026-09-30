@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Calendar, CalendarDays, Settings, Plus } from 'lucide-react';
+import { LayoutDashboard, Calendar, CalendarDays, Settings, Plus, FileText } from 'lucide-react';
 import PuncakLogo from './PuncakLogo';
 import { playBirdChirp } from '../utils/audio';
 import { isNative } from '../utils/notifications';
@@ -29,7 +29,9 @@ export default function Navbar({
             {/* Logo Puncak Melayang (Floating Icon Tanpa Kotak Latar Belakang) */}
             <PuncakLogo className="w-8 h-8 text-slate-900 transition-transform group-hover:scale-105" />
             <div>
-              <span className="font-bold text-xl text-slate-900 tracking-tight">Puncak</span>
+              <span className="font-bold text-xl text-slate-900 tracking-tight">
+                {activeTab === 'decision' ? 'Decision' : 'Puncak'}
+              </span>
             </div>
           </div>
 
@@ -71,6 +73,18 @@ export default function Navbar({
                 <Calendar className="w-4 h-4" />
                 Rekap Bulanan
               </button>
+
+              <button
+                onClick={() => setActiveTab('decision')}
+                className={`flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg active:scale-95 transition-all ${
+                  activeTab === 'decision'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+                Decision
+              </button>
             </nav>
 
             {/* Settings Button Desktop */}
@@ -106,7 +120,7 @@ export default function Navbar({
 
       {/* Mobile & iPad / Tablet Bottom Navigation Bar (Bawah Layar HP & iPad Seri Apapun: 2xl:hidden) */}
       <nav className="2xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#f0f4f8] px-4 py-2.5 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.06)] border-t border-slate-200 transition-all">
-        <div className="max-w-md mx-auto grid grid-cols-3 items-center text-center relative z-10">
+        <div className="max-w-md mx-auto grid grid-cols-4 items-center text-center relative z-10">
           {/* 1. Dashboard Harian */}
           <button
             onClick={() => setActiveTab('dashboard')}
@@ -138,6 +152,17 @@ export default function Navbar({
           >
             <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
             <span className="text-[10px] sm:text-xs font-semibold">Rekap Bulanan</span>
+          </button>
+
+          {/* 4. Decision */}
+          <button
+            onClick={() => setActiveTab('decision')}
+            className={`flex flex-col items-center gap-1 py-1 rounded-xl active:scale-95 transition-all ${
+              activeTab === 'decision' ? 'text-slate-800 font-bold' : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-[10px] sm:text-xs font-semibold">Decision</span>
           </button>
         </div>
       </nav>

@@ -8,6 +8,7 @@ import UpdateModal from './components/UpdateModal';
 import SettingsView from './components/SettingsView';
 import AdminDashboard from './components/AdminDashboard';
 import VoiceAssistantModal from './components/VoiceAssistantModal';
+import DecisionView from './components/DecisionView';
 import { Mic, Plus } from 'lucide-react';
 import { loadTasks, saveTasks } from './utils/storage';
 import { 
@@ -37,6 +38,10 @@ export default function App() {
   // In-App Update State
   const [updateInfo, setUpdateInfo] = useState(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+  // Decision View Reference & Form State
+  const decisionRef = useRef(null);
+  const [isDecisionFormOpen, setIsDecisionFormOpen] = useState(false);
 
   useEffect(() => {
     const loaded = loadTasks();
@@ -183,6 +188,12 @@ export default function App() {
   };
 
   const handleOpenAddTask = (targetDate) => {
+    if (activeTab === 'decision') {
+      if (decisionRef.current?.openAdd) {
+        decisionRef.current.openAdd();
+      }
+      return;
+    }
     const checkDate = targetDate || selectedDate || getTodayStr();
     if (isPastDate(checkDate)) {
       alert('Tidak dapat menambahkan tugas untuk hari/bulan yang sudah lewat');
@@ -240,6 +251,14 @@ export default function App() {
           <MonthlyRecap tasks={tasks} />
         )}
 
+        {activeTab === 'decision' && (
+          <DecisionView 
+            ref={decisionRef}
+            onOpenSettings={() => handleSwitchTab('settings')}
+            onFormStateChange={setIsDecisionFormOpen}
+          />
+        )}
+
         {activeTab === 'settings' && (
           <SettingsView 
             onBack={() => handleSwitchTab('dashboard')}
@@ -279,15 +298,15 @@ export default function App() {
       />
 
       {/* Unified Floating Action Buttons Stack (Pojok Kanan Bawah, Rapi di Atas Bottom Nav) */}
-      {!isModalOpen && !isUpdateModalOpen && activeTab !== 'settings' && (
+      {!isModalOpen && !isUpdateModalOpen && activeTab !== 'settings' && !isDecisionFormOpen && (
         <div className="fixed bottom-20 2xl:bottom-8 right-4 sm:right-6 md:right-8 z-40 flex flex-col items-center gap-2.5">
           {/* 1. Tombol Tambah Manual (+) */}
           <button
             type="button"
             onClick={() => handleOpenAddTask()}
             className="w-12 h-12 sm:w-13 sm:h-13 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 rounded-full flex items-center justify-center shadow-md shadow-slate-300/40 border border-slate-200/90 active:scale-95 transition-all duration-200 cursor-pointer"
-            title="Tambah Tugas Manual (+)"
-            aria-label="Tambah Tugas Manual"
+            title={activeTab === 'decision' ? 'Catat Baru (+)' : 'Tambah Tugas Manual (+)'}
+            aria-label="Tambah"
           >
             <Plus className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
           </button>
