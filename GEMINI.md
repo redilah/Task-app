@@ -92,3 +92,11 @@ Sebelum menyebut path file, URL raw GitHub, atau nama file dalam instruksi kepad
 - **Pemicu Izin WebView**: Gunakan pemicu `navigator.mediaDevices.getUserMedia({ audio: true })` sebelum rekaman Web Speech API dimulai agar dialog izin native sistem Android otomatis muncul.
 - **Android SDK Path**: Pastikan `android/local.properties` terkonfigurasi dengan `sdk.dir=C\:\\Users\\GC\\AppData\\Local\\Android\\Sdk`.
 
+## Larangan Filter Pembersihan Data Berbasis Prefix Timestamp (WAJIB)
+
+**DILARANG KERAS** menggunakan pembersihan/filtering data `localStorage` berbasis substring/prefix angka acak (seperti `.startsWith('dec-1')`, `.startsWith('thought-1')`, atau `.startsWith('task-1')`) untuk membersihkan data dummy lama.
+- **Alasan**: Timestamp epoch Unix modern (`Date.now()`) di era 2026+ selalu diawali dengan digit `1` (misal `1790...`). Pemfilteran berbasis prefix tersebut akan menghapus data riil pengguna secara instan dan permanen saat aplikasi dibuka atau saat berpindah tab.
+- **Standar Solusi**: Pembersihan data dummy atau migrasi skema HANYA boleh dilakukan dengan:
+  1. Daftar ID spesifik yang eksak (misal `id === 'dummy-decision-001'`), atau
+  2. Menggunakan flag migrasi versi terpisah di `localStorage` (misal `localStorage.getItem('puncak_schema_v2')`).
+
