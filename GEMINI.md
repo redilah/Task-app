@@ -66,9 +66,10 @@ Sebelum menyebut path file, URL raw GitHub, atau nama file dalam instruksi kepad
 - Render jendela tampak secara dinamis (`baseIndex = Math.round(-offsetY / ITEM_HEIGHT)`) agar elemen tidak hilang saat digulir cepat.
 - Tampilkan tepat 3 baris tanpa ruang kosong: baris tengah (aktif) dengan warna aksen kontras dan sedikit naik (`-translate-y-0.5`), baris atas/bawah redup.
 
-## Ketentuan Debug Sideload Keystore (WAJIB)
+## Ketentuan Debug Sideload Keystore & Deterministic Signing (WAJIB)
 
-- Untuk pengujian langsung di HP pengguna, selalu gunakan build standar `gradlew assembleDebug` kecuali user secara eksplisit meminta release signature. Hal ini mencegah error Android `Package conflict with existing package`.
+- **Penguncian Keystore Permanen**: File keystore penandatanganan build lokal WAJIB dikunci tetap pada `android/app/debug.keystore` dan dikonfigurasikan pada `signingConfigs.debug` di `android/app/build.gradle`.
+- **Larangan Bergantung pada Auto-Generated Keystore**: Dilarang mengandalkan keystore default global Android SDK yang rentan ter-generate ulang secara acak. Hal ini menjamin fingerprint sertifikat (SHA-256) selalu identik 100% antar-versi, sehingga user dapat selalu meng-update APK langsung di HP tanpa pernah mengalami error *"Package conflicts with an existing package"*.
 
 ## Standar Pembuatan File ZIP & Konfigurasi (WAJIB)
 

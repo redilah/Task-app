@@ -5,6 +5,7 @@ dist
 *.log
 
 *.keystore
+!android/app/debug.keystore
 keystore-info.txt
 
 *.apk
