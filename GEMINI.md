@@ -75,3 +75,19 @@ Sebelum menyebut path file, URL raw GitHub, atau nama file dalam instruksi kepad
 - **Wajib Forward Slash (/) di ZIP**: Saat membuat arsip `.zip` di lingkungan Windows (untuk plugin Claude, bundle MCP, atau distribusi cross-platform), DILARANG menggunakan tool yang menyimpan backslash (`\`) sebagai pemisah direktori. Wajib gunakan `tar -a -c -f output.zip -C <dir> .` atau script Node/Python agar entri path selalu menggunakan `/` standar.
 - **Wajib UTF-8 Tanpa BOM**: Saat membuat file JSON/manifest/config via PowerShell/Node, pastikan ditulis menggunakan UTF-8 No BOM (hindari `Set-Content -Encoding utf8` standar PowerShell 5.1 yang menambahkan 3 byte BOM). Gunakan `[System.IO.File]::WriteAllText($path, $text, (New-Object System.Text.UTF8Encoding($false)))` atau Node.js `fs.writeFileSync`.
 - **Unix Line Endings (LF)**: Selalu gunakan line ending `\n` (LF) untuk file manifest dan JSON cross-platform.
+
+## Pola Halaman Decision & Form Input (WAJIB)
+
+- **Header Bersih**: Judul halaman tampil ringkas dan murni (misal: "Decision") tanpa sub-teks deskripsi di bawahnya.
+- **Apple-Style Capsule Segmented Toggle**: Gunakan kapsul `rounded-full` dengan sliding active pill `bg-slate-900` dan transisi inersia lembut Apple `ease-[cubic-bezier(0.16,1,0.3,1)]` persis seperti pada Rekap Mingguan.
+- **Ikon Melayang Bebas (Boxless)**: Ikon pada kartu konten melayang langsung tanpa kotak/lingkaran pembungkus background.
+- **Opsi Ikon `none`**: Pilihan tanpa ikon wajib menggunakan tombol bertuliskan teks `none` murni tanpa logo/ikon pembungkus.
+- **Clean Input Placeholder**: Pada kolom input/textarea formulir, DILARANG menyertakan kalimat contoh (seperti *"Contoh: ..."*). Gunakan placeholder bersih atau kosong.
+- **Integrasi Floating Action Button (+)**: Jangan membuat tombol blok lebar di atas daftar kartu; gunakan tombol bulat floating (+) di pojok kanan bawah yang dinamis membuka form sesuai sub-tab aktif (Keputusan vs Pikiran Saat Ini), dan disembunyikan saat form sedang terbuka.
+
+## Setup Izin Mikrofon Android Native (WAJIB)
+
+- **Manifest Permission**: Wajib mendaftarkan `android.permission.RECORD_AUDIO` dan `android.permission.MODIFY_AUDIO_SETTINGS` di `android/app/src/main/AndroidManifest.xml` agar menu "Mikrofon" selalu muncul di Pengaturan HP > Info Aplikasi > Izin.
+- **Pemicu Izin WebView**: Gunakan pemicu `navigator.mediaDevices.getUserMedia({ audio: true })` sebelum rekaman Web Speech API dimulai agar dialog izin native sistem Android otomatis muncul.
+- **Android SDK Path**: Pastikan `android/local.properties` terkonfigurasi dengan `sdk.dir=C\:\\Users\\GC\\AppData\\Local\\Android\\Sdk`.
+
