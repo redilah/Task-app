@@ -1,6 +1,6 @@
 {
-  "versionCode": 34,
-  "versionName": "1.2.7",
-  "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk?v=1.2.7",
-  "releaseNotes": "New in this update:\n- [New] Fitur Decision (Keputusan & Pikiran Saat Ini) dengan Apple Design\n- [Fix] Izin Mikrofon Android OS Native & Perekaman Suara"
+  "versionCode": 35,
+  "versionName": "1.2.8",
+  "apkUrl": "https://raw.githubusercontent.com/redilah/Task-app/main/Puncak.apk?v=1.2.8",
+  "releaseNotes": "New in this update:\n- [Fix] Stabilitas penyimpanan lokal Fitur Decision & Pikiran Saat Ini\n- [Fix] Izin Mikrofon Android OS Native & Perekaman Suara"
 }
